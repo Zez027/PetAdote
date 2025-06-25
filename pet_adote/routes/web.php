@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\PetController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PasswordResetController;
 
 Route::get('/', [PetController::class, 'index'])->name('home');
 
@@ -11,6 +12,12 @@ Route::middleware('guest')->group(function () {
 
     Route::view('/register', 'auth.register')->name('register');
     Route::post('/register', [AuthController::class, 'register']);
+
+    // Recuperação de senha
+    Route::get('/password/reset', [PasswordResetController::class, 'requestForm'])->name('password.request');
+    Route::post('/password/email', [PasswordResetController::class, 'sendResetEmail'])->name('password.email');
+    Route::get('/password/reset/{token}', [PasswordResetController::class, 'resetForm'])->name('password.reset');
+    Route::post('/password/reset', [PasswordResetController::class, 'reset'])->name('password.update');
 });
 
 Route::middleware('auth')->group(function () {
@@ -27,4 +34,3 @@ Route::middleware('auth')->group(function () {
     Route::put('/pets/{pet}', [PetController::class, 'update'])->name('pets.update');
     Route::delete('/pets/{pet}', [PetController::class, 'destroy'])->name('pets.destroy');
 });
-

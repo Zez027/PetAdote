@@ -12,9 +12,9 @@
                 {{ ucfirst($f) }} <span class="text-danger">*</span>
             </label>
             <input 
-                type="{{ $f == 'email' ? 'email' : 'text' }}"
+                type="{{ $f === 'email' ? 'email' : 'text' }}"
                 name="{{ $f }}"
-                id="{{ $f == 'cpf' ? 'cpf' : ($f == 'contato' ? 'contato' : '') }}"
+                id="{{ $f }}"
                 class="form-control @error($f) is-invalid @enderror"
                 value="{{ old($f) }}"
                 required
@@ -27,53 +27,92 @@
 
     <div class="mb-3">
         <label class="form-label">País *</label>
-        <select id="pais" name="pais" class="form-control" required>
-            <option value="Brasil" selected>Brasil</option>
-        </select>
+        <input 
+            id="pais" 
+            name="pais" 
+            list="lista-paises" 
+            class="form-control @error('pais') is-invalid @enderror"
+            value="{{ old('pais', 'Brasil') }}" 
+            required
+        >
+        <datalist id="lista-paises">
+            <option value="Brasil">
+            <!-- Adicione mais países se desejar -->
+        </datalist>
+        @error('pais')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
     </div>
 
     <div class="mb-3">
-    <label class="form-label">Estado *</label>
+        <label class="form-label">Estado *</label>
         <input 
             id="estado" 
             name="estado" 
             list="lista-estados" 
-            class="form-control" 
+            class="form-control @error('estado') is-invalid @enderror"
             value="{{ old('estado') }}" 
             required
         >
-    <datalist id="lista-estados"></datalist>
+        <datalist id="lista-estados"></datalist>
+        @error('estado')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
     </div>
 
     <div class="mb-3">
-    <label class="form-label">Cidade *</label>
+        <label class="form-label">Cidade *</label>
         <input 
             id="cidade" 
             name="cidade" 
             list="lista-cidades" 
-            class="form-control" 
+            class="form-control @error('cidade') is-invalid @enderror"
             value="{{ old('cidade') }}" 
             required
+            autocomplete="off"
         >
-    <datalist id="lista-cidades"></datalist>
+        <datalist id="lista-cidades"></datalist>
+        @error('cidade')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
     </div>
 
     <div class="mb-3">
         <label class="form-label">Facebook</label>
-        <input type="url" name="facebook" class="form-control @error('facebook') is-invalid @enderror" value="{{ old('facebook') }}">
-        @error('facebook')<div class="invalid-feedback">{{ $message }}</div>@enderror
+        <input 
+            type="url" 
+            name="facebook" 
+            class="form-control @error('facebook') is-invalid @enderror" 
+            value="{{ old('facebook') }}"
+        >
+        @error('facebook')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
     </div>
 
     <div class="mb-3">
         <label class="form-label">Instagram</label>
-        <input type="url" name="instagram" class="form-control @error('instagram') is-invalid @enderror" value="{{ old('instagram') }}">
-        @error('instagram')<div class="invalid-feedback">{{ $message }}</div>@enderror
+        <input 
+            type="url" 
+            name="instagram" 
+            class="form-control @error('instagram') is-invalid @enderror" 
+            value="{{ old('instagram') }}"
+        >
+        @error('instagram')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
     </div>
 
     <div class="mb-3">
         <label class="form-label">Senha <span class="text-danger">*</span></label>
         <div class="input-group">
-            <input type="password" name="password" id="senha" class="form-control @error('password') is-invalid @enderror" required>
+            <input 
+                type="password" 
+                name="password" 
+                id="senha" 
+                class="form-control @error('password') is-invalid @enderror" 
+                required
+            >
             <span class="input-group-text" onclick="togglePassword('senha')" style="cursor: pointer;">👁️</span>
         </div>
         @error('password')
@@ -84,7 +123,13 @@
     <div class="mb-3">
         <label class="form-label">Confirmar Senha <span class="text-danger">*</span></label>
         <div class="input-group">
-            <input type="password" name="password_confirmation" id="confirmar_senha" class="form-control" required>
+            <input 
+                type="password" 
+                name="password_confirmation" 
+                id="confirmar_senha" 
+                class="form-control" 
+                required
+            >
             <span class="input-group-text" onclick="togglePassword('confirmar_senha')" style="cursor: pointer;">👁️</span>
         </div>
     </div>
@@ -92,18 +137,9 @@
     <button class="btn btn-primary">Registrar</button>
 </form>
 
+<!-- Scripts -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
-<script>
-    $(document).ready(function(){
-        $('#cpf').mask('000.000.000-00');
-        $('#contato').mask('(00) 00000-0000');
-    });
-
-    function togglePassword(id) {
-        const input = document.getElementById(id);
-        input.type = input.type === 'password' ? 'text' : 'password';
-    }
-</script>
+<script src="{{ asset('js/masks.js') }}"></script>
 <script src="{{ asset('js/location.js') }}"></script>
 @endsection

@@ -23,40 +23,6 @@
             @enderror
         </div>
 
-        <!-- País -->
-        <div class="mb-3">
-            <label for="pais">País</label>
-            <select id="pais" name="pais" class="form-control" required>
-                <option value="Brasil" selected>Brasil</option>
-            </select>
-        </div>
-
-        <div class="mb-3">
-        <label class="form-label">Estado *</label>
-            <input 
-                id="estado" 
-                name="estado" 
-                list="lista-estados" 
-                class="form-control" 
-                value="{{ old('estado') }}" 
-                required
-            >
-        <datalist id="lista-estados"></datalist>
-        </div>
-
-        <div class="mb-3">
-        <label class="form-label">Cidade *</label>
-            <input 
-                id="cidade" 
-                name="cidade" 
-                list="lista-cidades" 
-                class="form-control" 
-                value="{{ old('cidade') }}" 
-                required
-            >
-        <datalist id="lista-cidades"></datalist>
-        </div>
-
         <div class="mb-3">
             <label for="porte" class="form-label">Porte</label>
             <select name="porte" id="porte" class="form-select @error('porte') is-invalid @enderror" required>
@@ -70,17 +36,27 @@
         </div>
 
         <div class="mb-3">
-            <label for="raca" class="form-label">Raça</label>
-            <input type="text" name="raca" id="raca" class="form-control @error('raca') is-invalid @enderror" value="{{ old('raca', $pet->raca) }}" required>
-            @error('raca')
+            <label for="tipo" class="form-label">Tipo</label>
+            <input type="text" name="tipo" id="tipo" class="form-control @error('tipo') is-invalid @enderror" value="{{ old('tipo', $pet->tipo) }}" required list="lista-tipos">
+            <datalist id="lista-tipos">
+                <option value="Cachorro">
+                <option value="Gato">
+                <option value="Pássaro">
+                <option value="Coelho">
+                <option value="Hamster">
+                <option value="Réptil">
+                <option value="Outro">
+            </datalist>
+            @error('tipo')
                 <div class="invalid-feedback">{{ $message }}</div>
             @enderror
         </div>
 
         <div class="mb-3">
-            <label for="tipo" class="form-label">Tipo</label>
-            <input type="text" name="tipo" id="tipo" class="form-control @error('tipo') is-invalid @enderror" value="{{ old('tipo', $pet->tipo) }}" required>
-            @error('tipo')
+            <label for="raca" class="form-label">Raça</label>
+            <input type="text" name="raca" id="raca" class="form-control @error('raca') is-invalid @enderror" value="{{ old('raca', $pet->raca) }}" required list="lista-racas">
+            <datalist id="lista-racas"></datalist>
+            @error('raca')
                 <div class="invalid-feedback">{{ $message }}</div>
             @enderror
         </div>
@@ -106,28 +82,46 @@
         </div>
 
         <div class="mb-3">
-            <label for="pais" class="form-label">País</label>
-            <input type="text" name="pais" id="pais" class="form-control @error('pais') is-invalid @enderror" value="{{ old('pais', $pet->pais) }}" required>
-            @error('pais')
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
-        </div>
+        <label class="form-label">País *</label>
+        <input 
+            id="pais" 
+            name="pais" 
+            list="lista-paises" 
+            class="form-control" 
+            value="{{ old('pais', $pet->pais ?? 'Brasil') }}" 
+            required
+        >
+        <datalist id="lista-paises">
+            <option value="Brasil">
+        </datalist>
+    </div>
 
-        <div class="mb-3">
-            <label for="estado" class="form-label">Estado</label>
-            <input type="text" name="estado" id="estado" class="form-control @error('estado') is-invalid @enderror" value="{{ old('estado', $pet->estado) }}" required>
-            @error('estado')
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
-        </div>
+    <div class="mb-3">
+        <label class="form-label">Estado *</label>
+        <input 
+            id="estado" 
+            name="estado" 
+            list="lista-estados" 
+            class="form-control" 
+            value="{{ old('estado', $pet->estado ?? '') }}" 
+            required
+        >
+        <datalist id="lista-estados"></datalist>
+    </div>
 
-        <div class="mb-3">
-            <label for="cidade" class="form-label">Cidade</label>
-            <input type="text" name="cidade" id="cidade" class="form-control @error('cidade') is-invalid @enderror" value="{{ old('cidade', $pet->cidade) }}" required>
-            @error('cidade')
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
-        </div>
+    <div class="mb-3">
+        <label class="form-label">Cidade *</label>
+        <input 
+            id="cidade" 
+            name="cidade" 
+            list="lista-cidades" 
+            class="form-control" 
+            value="{{ old('cidade', $pet->cidade ?? '') }}" 
+            required
+            autocomplete="off"
+        >
+        <datalist id="lista-cidades"></datalist>
+    </div>
 
         <div class="mb-3">
             <label for="photos" class="form-label">Fotos (opcional, pode enviar várias)</label>
@@ -138,4 +132,5 @@
         <a href="{{ route('pets.meus') }}" class="btn btn-secondary">Cancelar</a>
     </form>
     <script src="{{ asset('js/location.js') }}"></script>
+    <script src="{{ asset('js/animal_breeds.js') }}"></script>
 @endsection

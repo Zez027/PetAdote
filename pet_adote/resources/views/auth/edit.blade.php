@@ -30,35 +30,44 @@
 
     <div class="mb-3">
         <label class="form-label">País *</label>
-        <select id="pais" name="pais" class="form-control" required>
-            <option value="Brasil" selected>Brasil</option>
-        </select>
+        <input 
+            id="pais" 
+            name="pais" 
+            list="lista-paises" 
+            class="form-control" 
+            value="{{ old('pais', $user->pais ?? 'Brasil') }}" 
+            required
+        >
+        <datalist id="lista-paises">
+            <option value="Brasil">
+        </datalist>
     </div>
 
     <div class="mb-3">
-    <label class="form-label">Estado *</label>
+        <label class="form-label">Estado *</label>
         <input 
             id="estado" 
             name="estado" 
             list="lista-estados" 
             class="form-control" 
-            value="{{ old('estado') }}" 
+            value="{{ old('estado', $user->estado ?? '') }}" 
             required
         >
-    <datalist id="lista-estados"></datalist>
+        <datalist id="lista-estados"></datalist>
     </div>
 
     <div class="mb-3">
-    <label class="form-label">Cidade *</label>
+        <label class="form-label">Cidade *</label>
         <input 
             id="cidade" 
             name="cidade" 
             list="lista-cidades" 
             class="form-control" 
-            value="{{ old('cidade') }}" 
+            value="{{ old('cidade', $user->cidade ?? '') }}" 
             required
+            autocomplete="off"
         >
-    <datalist id="lista-cidades"></datalist>
+        <datalist id="lista-cidades"></datalist>
     </div>
 
     <div class="mb-3">
@@ -74,5 +83,9 @@
     <button class="btn btn-primary">Salvar Alterações</button>
 </form>
 
+<!-- Bibliotecas e scripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+<script src="{{ asset('js/masks.js') }}"></script>
 <script src="{{ asset('js/location.js') }}"></script>
 @endsection
