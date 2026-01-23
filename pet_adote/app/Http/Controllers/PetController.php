@@ -5,131 +5,263 @@ namespace App\Http\Controllers;
 use App\Models\Pet;
 use App\Models\PetPhoto;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class PetController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth')->except(['index','show']);
+        $this->middleware('auth')->except(['index', 'show']);
     }
 
-    // Lista todos os pets (página inicial) com filtro
+    // LISTAGEM COM FILTROS
     public function index(Request $request)
     {
-        $query = Pet::with('photos');
+        $query = Pet::with('photos')
+            ->where('status', 'disponivel'); // filtra apenas disponíveis
 
         if ($request->filled('cidade')) {
             $query->where('cidade', $request->cidade);
         }
+
+        if ($request->filled('estado')) {
+            $query->where('estado', $request->estado);
+        }
+
         if ($request->filled('tipo')) {
             $query->where('tipo', $request->tipo);
         }
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
+
+        if ($request->filled('porte')) {
+            $query->where('porte', $request->porte);
         }
 
-        $pets = $query->get();
-        $cidades = Pet::select('cidade')->distinct()->pluck('cidade');
-        $tipos = Pet::select('tipo')->distinct()->pluck('tipo');
-        $statuses = ['disponivel', 'indisponivel', 'adotado'];
+        if ($request->filled('genero')) {
+            $query->where('genero', $request->genero);
+        }
 
-        return view('pets.index', compact('pets', 'cidades', 'tipos', 'statuses'));
+        if ($request->filled('raca')) {
+            $query->where('raca', 'LIKE', '%' . $request->raca . '%');
+        }
+
+        $pets = $query->orderBy('created_at', 'desc')->paginate(9)->appends($request->query());
+
+        return view('pets.index', compact('pets'));
     }
 
-    // Lista apenas os pets do usuário logado
+    // FORMULÁRIO DE CADASTRO DE PET
+    public function create()
+    {
+        // Tipos de pets
+        $types = [
+            'Cachorro', 'Gato', 'Pássaro', 'Coelho',
+            'Roedor', 'Exótico', 'Outro'
+        ];
+
+        // Status do pet
+        $statuses = ['disponivel', 'indisponivel', 'adotado'];
+
+        return view('pets.create', compact('types', 'statuses'));
+    }
+
+    // SALVAR PET
+    public function store(Request $request)
+    {
+        $request->validate([
+            'nome'      => 'required|string|max:255',
+            'idade'     => 'required|integer',
+            'genero'    => 'required|string',
+            'porte'     => 'required|string',
+            'tipo'      => 'required|string|max:255',
+            'raca'      => 'required|string|max:255',
+            'descricao' => 'nullable|string',
+            'status'    => 'required|in:disponivel,indisponivel,adotado',
+
+            // LOCALIZAÇÃO (required)
+            'pais'      => 'required|string',
+            'estado'    => 'required|string',
+            'cidade'    => 'required|string',
+
+            'photos.*'  => 'image|max:2048'
+        ]);
+
+        $pet = Pet::create([
+            'user_id'   => auth()->id(),
+            'nome'      => $request->nome,
+            'idade'     => $request->idade,
+            'genero'    => $request->genero,
+            'porte'     => $request->porte,
+            'tipo'      => $request->tipo,
+            'raca'      => $request->raca,
+            'descricao' => $request->descricao,
+
+            'pais'      => $request->pais,
+            'estado'    => $request->estado,
+            'cidade'    => $request->cidade,
+
+            'status'    => $request->status,
+        ]);
+
+        if ($request->hasFile('photos')) {
+            foreach ($request->file('photos') as $photo) {
+                $path = $photo->store('pets', 'public');
+                $pet->photos()->create(['foto' => $path]);
+            }
+        }
+
+        return redirect()->route('pets.meus')->with('success', 'Pet cadastrado com sucesso!');
+    }
+
+    // LISTAR MEUS PETS
     public function meusPets()
     {
-        $pets = Pet::with('photos')->where('user_id', auth()->id())->get();
+        $pets = Pet::where('user_id', auth()->id())
+            ->with('photos')
+            ->latest()
+            ->paginate(6);
 
         return view('pets.meus-pets', compact('pets'));
     }
 
-    public function create()
+    // MOSTRAR PET
+    public function show($id)
     {
-        return view('pets.create');
-    }
-
-    public function store(Request $request)
-    {
-        $data = $request->validate([
-            'nome' => 'required|string|max:255',
-            'idade' => 'required|integer|min:0',
-            'porte' => 'required|string',
-            'raca' => 'required|string',
-            'tipo' => 'required|string',
-            'descricao' => 'nullable|string',
-            'status' => 'required|string',
-            'pais' => 'required|string',
-            'estado' => 'required|string',
-            'cidade' => 'required|string',
-        ]);
-    
-        $data['user_id'] = auth()->id();
-    
-        $pet = Pet::create($data);
-
-        if($request->hasFile('photos')){
-            foreach($request->file('photos') as $photo){
-                $path = $photo->store('pets', 'public');
-                PetPhoto::create(['foto'=>$path, 'pet_id'=>$pet->id]);
-            }
-        }
-
-        return redirect()->route('pets.meus')->with('success', 'Pet cadastrado com sucesso!');;
-    }
-
-    public function show(Pet $pet)
-    {
-        $pet->load('photos','user');
+        $pet = Pet::with('photos', 'user')->findOrFail($id);
         return view('pets.show', compact('pet'));
     }
 
-    public function edit(Pet $pet)
+    // FORMULÁRIO DE EDIÇÃO
+    public function edit($id)
     {
-        // Verifica se o pet pertence ao usuário logado
-        if ($pet->user_id !== auth()->id()) {
-            abort(403);
+        $pet = Pet::with('photos')->findOrFail($id);
+
+        if ($pet->user_id != Auth::id()) {
+            abort(403, 'Acesso negado');
         }
-        return view('pets.edit', compact('pet'));
+
+        $types = [
+            'Cachorro', 'Gato', 'Pássaro', 'Coelho',
+            'Roedor', 'Exótico', 'Outro'
+        ];
+
+        $statuses = ['disponivel', 'indisponivel', 'adotado'];
+
+        return view('pets.edit', compact('pet', 'types', 'statuses'));
     }
 
-    public function update(Request $request, Pet $pet)
+    // ATUALIZAR PET
+    public function update(Request $request, $id)
     {
-        if ($pet->user_id !== auth()->id()) {
-            abort(403);
+        $pet = Pet::with('photos')->findOrFail($id);
+
+        // Verifica se o usuário é dono do pet
+        if ($pet->user_id != Auth::id()) {
+            abort(403, 'Acesso negado');
         }
 
-        $data = $request->validate([
-            'nome' => 'required|string|max:255',
-            'idade' => 'required|integer|min:0',
-            'porte' => 'required|string',
-            'raca' => 'required|string',
-            'tipo' => 'required|string',
+        // Validação
+        $request->validate([
+            'nome'      => 'required|string|max:255',
+            'idade'     => 'required|integer',
+            'genero'    => 'required|string',
+            'porte'     => 'required|string',
+            'tipo'      => 'required|string|max:255',
+            'raca'      => 'required|string|max:255',
             'descricao' => 'nullable|string',
-            'status' => 'required|string',
-            'pais' => 'required|string',
-            'estado' => 'required|string',
-            'cidade' => 'required|string',
+            'status'    => 'required|in:disponivel,indisponivel,adotado',
+            'pais'      => 'required|string',
+            'estado'    => 'required|string',
+            'cidade'    => 'required|string',
+            'photos.*'  => 'image|max:2048',
+            'main_photo_id' => 'nullable|exists:pet_photos,id',
+        ]);
+        
+        $pet->update([
+            'nome'      => $request->nome,
+            'idade'     => $request->idade,
+            'genero'    => $request->genero,
+            'porte'     => $request->porte,
+            'tipo'      => $request->tipo,
+            'raca'      => $request->raca,
+            'descricao' => $request->descricao,
+            'status'    => $request->status,
+            'pais'      => $request->pais,
+            'estado'    => $request->estado,
+            'cidade'    => $request->cidade,
         ]);
 
-        $pet->update($data);
+        // Atualiza foto principal
+        if ($request->filled('main_photo_id')) {
+            $pet->photos()->update(['is_main' => false]);
 
-        if($request->hasFile('photos')){
-            foreach($request->file('photos') as $photo){
-                $path = $photo->store('pets', 'public');
-                PetPhoto::create(['foto'=>$path, 'pet_id'=>$pet->id]);
+            $mainPhoto = $pet->photos()->where('id', $request->main_photo_id)->first();
+            if ($mainPhoto) {
+                $mainPhoto->is_main = true;
+                $mainPhoto->save();
+            }
+        }
+
+        // Salvar novas fotos
+        if ($request->hasFile('photos')) {
+            foreach ($request->file('photos') as $file) {
+                $path = $file->store('pets', 'public');
+                $pet->photos()->create(['foto' => $path]);
             }
         }
 
         return redirect()->route('pets.meus')->with('success', 'Pet atualizado com sucesso!');
     }
 
-    public function destroy(Pet $pet)
+    // EXCLUIR PET
+    public function destroy($id)
     {
-        if ($pet->user_id !== auth()->id()) {
+        $pet = Pet::with('photos')->findOrFail($id);
+
+        if ($pet->user_id != Auth::id()) {
+            abort(403, 'Acesso negado');
+        }
+
+        foreach ($pet->photos as $photo) {
+            if (Storage::disk('public')->exists($photo->foto)) {
+                Storage::disk('public')->delete($photo->foto);
+            }
+            $photo->delete();
+        }
+
+        $pet->delete();
+
+        return redirect()->route('pets.index')->with('success', 'Pet removido com sucesso!');
+    }
+
+    // EXCLUIR FOTO
+    public function deletePhoto(PetPhoto $photo)
+    {
+        if ($photo->pet->user_id != Auth::id()) {
             abort(403);
         }
-        $pet->delete();
-        return redirect()->route('pets.meus')->with('success','Pet excluído!');
+    
+        if (Storage::disk('public')->exists($photo->foto)) {
+            Storage::disk('public')->delete($photo->foto);
+        }
+    
+        $photo->delete();
+    
+        return back()->with('success', 'Foto removida com sucesso!');
+    }
+    
+    // DEFINIR FOTO PRINCIPAL
+    public function setMainPhoto(PetPhoto $photo)
+    {
+        if ($photo->pet->user_id != Auth::id()) {
+            abort(403);
+        }
+    
+        PetPhoto::where('pet_id', $photo->pet_id)->update(['is_main' => false]);
+    
+        $photo->is_main = true;
+        $photo->save();
+    
+        return redirect()->back()->with('success', 'Foto principal atualizada!');
     }
 }

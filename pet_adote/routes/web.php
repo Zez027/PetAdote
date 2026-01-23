@@ -33,4 +33,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/pets/{pet}/edit', [PetController::class, 'edit'])->name('pets.edit');
     Route::put('/pets/{pet}', [PetController::class, 'update'])->name('pets.update');
     Route::delete('/pets/{pet}', [PetController::class, 'destroy'])->name('pets.destroy');
+
+    // Rotas de foto do pet
+    Route::post('/pets/photo/{photo}/main', [PetController::class, 'setMainPhoto'])->name('pets.photo.main');
+    Route::delete('/pets/photo/{photo}', [PetController::class, 'deletePhoto'])->name('pets.photo.delete');
+
+
+
 });

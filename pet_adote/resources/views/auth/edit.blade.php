@@ -1,91 +1,96 @@
 @extends('layouts.app')
 
 @section('content')
-<h1>Editar Perfil</h1>
+<div class="row justify-content-center">
+    <div class="col-md-6">
 
-@if(session('success'))
-    <div class="alert alert-success">{{ session('success') }}</div>
-@endif
+        <div class="card shadow-lg border-0 mt-4">
+            <div class="card-header bg-primary text-white text-center">
+                <h4>Editar Perfil</h4>
+            </div>
 
-<form method="POST" action="{{ route('perfil.update') }}">
-    @csrf
-    @method('PUT')
+            <div class="card-body">
 
-    @foreach(['name','email','cpf','contato'] as $f)
-        <div class="mb-3">
-            <label class="form-label">{{ ucfirst($f) }} <span class="text-danger">*</span></label>
-            <input 
-                type="{{ $f == 'email' ? 'email' : 'text' }}"
-                name="{{ $f }}"
-                id="{{ $f }}"
-                class="form-control @error($f) is-invalid @enderror"
-                value="{{ old($f, $user->$f) }}"
-                required
-            >
-            @error($f)
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
+                @if(session('success'))
+                    <div class="alert alert-success text-center">{{ session('success') }}</div>
+                @endif
+
+                <form method="POST" action="{{ route('perfil.update') }}">
+                    @csrf
+                    @method('PUT')
+
+                    @foreach(['name','email','cpf','contato'] as $f)
+                        <div class="mb-3">
+                            <label class="form-label">{{ ucfirst($f) }} <span class="text-danger">*</span></label>
+                            <input 
+                                type="{{ $f == 'email' ? 'email' : 'text' }}"
+                                name="{{ $f }}"
+                                class="form-control @error($f) is-invalid @enderror"
+                                value="{{ old($f, $user->$f) }}"
+                                required
+                            >
+                            @error($f)
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    @endforeach
+
+                    <hr>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">País *</label>
+                            <input id="pais" name="pais" class="form-control"
+                                list="lista-paises"
+                                value="{{ old('pais', $user->pais ?? 'Brasil') }}"
+                                required>
+                            <datalist id="lista-paises">
+                                <option value="Brasil">
+                            </datalist>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Estado *</label>
+                            <input id="estado" name="estado" list="lista-estados"
+                                class="form-control"
+                                value="{{ old('estado', $user->estado ?? '') }}"
+                                required>
+                            <datalist id="lista-estados"></datalist>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Cidade *</label>
+                            <input id="cidade" name="cidade" list="lista-cidades"
+                                class="form-control"
+                                value="{{ old('cidade', $user->cidade ?? '') }}"
+                                required>
+                            <datalist id="lista-cidades"></datalist>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="mb-3">
+                        <label>Facebook</label>
+                        <input type="url" name="facebook" class="form-control"
+                            value="{{ old('facebook', $user->facebook) }}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Instagram</label>
+                        <input type="url" name="instagram" class="form-control"
+                            value="{{ old('instagram', $user->instagram) }}">
+                    </div>
+
+                    <button class="btn btn-primary w-100 mt-3">Salvar Alterações</button>
+
+                </form>
+
+            </div>
         </div>
-    @endforeach
 
-    <div class="mb-3">
-        <label class="form-label">País *</label>
-        <input 
-            id="pais" 
-            name="pais" 
-            list="lista-paises" 
-            class="form-control" 
-            value="{{ old('pais', $user->pais ?? 'Brasil') }}" 
-            required
-        >
-        <datalist id="lista-paises">
-            <option value="Brasil">
-        </datalist>
     </div>
+</div>
 
-    <div class="mb-3">
-        <label class="form-label">Estado *</label>
-        <input 
-            id="estado" 
-            name="estado" 
-            list="lista-estados" 
-            class="form-control" 
-            value="{{ old('estado', $user->estado ?? '') }}" 
-            required
-        >
-        <datalist id="lista-estados"></datalist>
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">Cidade *</label>
-        <input 
-            id="cidade" 
-            name="cidade" 
-            list="lista-cidades" 
-            class="form-control" 
-            value="{{ old('cidade', $user->cidade ?? '') }}" 
-            required
-            autocomplete="off"
-        >
-        <datalist id="lista-cidades"></datalist>
-    </div>
-
-    <div class="mb-3">
-        <label>Facebook</label>
-        <input type="url" name="facebook" class="form-control" value="{{ old('facebook', $user->facebook) }}">
-    </div>
-
-    <div class="mb-3">
-        <label>Instagram</label>
-        <input type="url" name="instagram" class="form-control" value="{{ old('instagram', $user->instagram) }}">
-    </div>
-
-    <button class="btn btn-primary">Salvar Alterações</button>
-</form>
-
-<!-- Bibliotecas e scripts -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
-<script src="{{ asset('js/masks.js') }}"></script>
 <script src="{{ asset('js/location.js') }}"></script>
 @endsection

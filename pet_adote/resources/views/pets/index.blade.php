@@ -1,97 +1,164 @@
 @extends('layouts.app')
 
 @section('content')
-    <h1 class="mb-4">Pets Disponíveis para Adoção</h1>
+<div class="container mt-4">
+    <h1 class="mb-4 text-center">Pets para Adoção 🐶🐱</h1>
 
-    {{-- Filtros --}}
-    <form method="GET" class="row g-2 mb-4">
-        <div class="col-md-3">
-        <input name="estado" id="estado" list="lista-estados" class="form-control" placeholder="Digite ou escolha o estado">
-            <datalist id="lista-estados">
-            <!-- Estados vão aqui -->
-            </datalist>
+    {{-- Mensagem de sucesso --}}
+    @if(session('success'))
+        <div class="alert alert-success text-center">
+            {{ session('success') }}
         </div>
+    @endif
 
-        <div class="col-md-3">
-            <input name="cidade" id="cidade" list="lista-cidades" class="form-control" placeholder="Digite ou escolha a cidade">
-            <datalist id="lista-cidades">
-                <!-- Cidades vão aqui -->
-            </datalist>
-        </div>
+    {{-- Form de filtros --}}
+    <form method="GET" action="{{ route('home') }}" class="mb-4">
+        <div class="row g-2">
 
-        <div class="col-md-3">
-            <select name="status" class="form-select">
-                <option value="">-- Status --</option>
-                @foreach($statuses as $status)
-                    <option value="{{ $status }}" {{ request('status') == $status ? 'selected' : '' }}>{{ ucfirst($status) }}</option>
-                @endforeach
+            <!-- Cidade -->
+            <select name="cidade" id="cidade" class="form-select">
+                <option value="">Cidade</option>
             </select>
-        </div>
+            
+            <!-- Estado -->
+            <div class="col-md-2">
+                <select name="estado" id="estado" class="form-select">
+                    <option value="">Estado</option>
+                </select>
+            </div>
 
-        <div class="col-md-3">
-            <button class="btn btn-primary w-100">Filtrar</button>
+            <!-- Tipo -->
+            <div class="col-md-2">
+                <select name="tipo" class="form-select">
+                    <option value="">Tipo</option>
+                    <option value="Cachorro" {{ request('tipo') == 'Cachorro' ? 'selected' : '' }}>Cachorro</option>
+                    <option value="Gato" {{ request('tipo') == 'Gato' ? 'selected' : '' }}>Gato</option>
+                    <option value="Outro" {{ request('tipo') == 'Outro' ? 'selected' : '' }}>Outro</option>
+                </select>
+            </div>
+
+            <!-- Porte -->
+            <div class="col-md-2">
+                <select name="porte" class="form-select">
+                    <option value="">Porte</option>
+                    <option value="pequeno" {{ request('porte') == 'pequeno' ? 'selected' : '' }}>Pequeno</option>
+                    <option value="medio" {{ request('porte') == 'medio' ? 'selected' : '' }}>Médio</option>
+                    <option value="grande" {{ request('porte') == 'grande' ? 'selected' : '' }}>Grande</option>
+                </select>
+            </div>
+
+            <!-- Gênero -->
+            <div class="col-md-2">
+                <select name="genero" class="form-select">
+                    <option value="">Gênero</option>
+                    <option value="Macho" {{ request('genero') == 'Macho' ? 'selected' : '' }}>Macho</option>
+                    <option value="Fêmea" {{ request('genero') == 'Fêmea' ? 'selected' : '' }}>Fêmea</option>
+                </select>
+            </div>
+
+            <!-- Raça -->
+            <div class="col-md-3">
+                <input type="text" name="raca" class="form-control"
+                    placeholder="Raça"
+                    value="{{ request('raca') }}">
+            </div>
+
+            <!-- Filtrar -->
+            <div class="col-md-2">
+                <button class="btn btn-success w-100">Filtrar</button>
+            </div>
+
+            <!-- Limpar -->
+            <div class="col-md-2">
+                <a href="{{ route('home') }}" class="btn btn-secondary w-100">Limpar</a>
+            </div>
+
         </div>
     </form>
 
-    {{-- Botão de cadastro --}}
-    @auth
-        <a href="{{ route('pets.create') }}" class="btn btn-success mb-4">Cadastrar Novo Pet</a>
-    @endauth
-
     {{-- Listagem --}}
-    @if($pets->isEmpty())
-        <div class="alert alert-info">Nenhum pet encontrado com os filtros aplicados.</div>
-    @else
-        <div class="row">
-            @foreach($pets as $pet)
-                <div class="col-md-4 mb-4">
-                    <div class="card h-100 shadow-sm rounded">
-                        @if($pet->photos->count() > 0)
-                            <img
-                                src="{{ asset('storage/' . $pet->photos->first()->foto) }}"
-                                class="card-img-top"
-                                alt="Foto do pet {{ $pet->nome }}"
-                                style="height: 220px; object-fit: cover;">
-                        @else
-                            <img
-                                src="https://via.placeholder.com/400x250?text=Sem+foto"
-                                class="card-img-top"
-                                alt="Sem foto">
-                        @endif
+    <div class="row">
+        @forelse($pets as $pet)
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm border-0 rounded-3">
 
-                        <div class="card-body">
-                            <h5 class="card-title">{{ $pet->nome }}</h5>
-                            <p class="card-text">
-                                <strong>Idade:</strong> {{ $pet->idade }} anos<br>
-                                <strong>Porte:</strong> {{ ucfirst($pet->porte) }}<br>
-                                <strong>Raça:</strong> {{ $pet->raca }}<br>
-                                <strong>Tipo:</strong> {{ ucfirst($pet->tipo) }}<br>
-                                <strong>Status:</strong>
-                                <span class="badge bg-{{ $pet->status == 'disponivel' ? 'success' : ($pet->status == 'adotado' ? 'secondary' : 'warning') }}">
-                                    {{ ucfirst($pet->status) }}
-                                </span>
-                                @if($pet->descricao)
-                                    <br><strong>Descrição:</strong> {{ $pet->descricao }}
-                                @endif
-                            </p>
-                        </div>
+                    {{-- Foto principal --}}
+                    @php
+                        $main = $pet->photos->where('is_main', true)->first();
+                        $foto = $main->foto ?? ($pet->photos->first()->foto ?? null);
+                    @endphp
 
-                        @auth
-                        <div class="card-footer d-flex justify-content-between">
-                            @if(auth()->id() === $pet->user_id)
-                                <a href="{{ route('pets.edit', $pet) }}" class="btn btn-sm btn-warning">Editar</a>
-                                <form action="{{ route('pets.destroy', $pet) }}" method="POST" onsubmit="return confirm('Deseja realmente excluir este pet?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-danger">Excluir</button>
-                                </form>
-                            @endif
+                    @if($foto)
+                        <img 
+                            src="{{ asset('storage/' . $foto) }}" 
+                            class="card-img-top"
+                            alt="{{ $pet->nome }}"
+                            style="object-fit: cover; height: 250px;"
+                        >
+                    @else
+                        <img 
+                            src="{{ asset('images/sem-foto.png') }}" 
+                            class="card-img-top"
+                            alt="Sem foto"
+                            style="object-fit: cover; height: 250px;"
+                        >
+                    @endif
+
+                    <div class="card-body text-center d-flex flex-column">
+                        <h5 class="card-title">{{ $pet->nome }}</h5>
+                        <p class="text-muted">{{ $pet->idade }} anos • {{ ucfirst($pet->porte) }}</p>
+                        <p class="text-secondary small">📍 {{ $pet->cidade }}, {{ $pet->estado }}</p>
+                        <p>{{ Str::limit($pet->descricao, 100) }}</p>
+                        <div class="mt-auto">
+                            <a href="{{ route('pets.show', $pet->id) }}" class="btn btn-outline-success">Ver detalhes</a>
                         </div>
-                        @endauth
                     </div>
+
                 </div>
-            @endforeach
-        </div>
-    @endif
-    <script src="{{ asset('js/location.js') }}"></script>
+            </div>
+        @empty
+            <p class="text-center mt-5">Nenhum pet disponível 😢</p>
+        @endforelse
+    </div>
+
+    <div class="mt-4 d-flex justify-content-center">
+        {{ $pets->links() }}
+    </div>
+
+</div>
+
+{{-- Inclui o location.js --}}
+<script src="{{ asset('js/location.js') }}"></script>
+<script>
+    // Inicializa estados e cidades
+    document.addEventListener('DOMContentLoaded', function() {
+        const estadoSelect = document.getElementById('estado');
+        const cidadeSelect = document.getElementById('cidade');
+
+        // Preenche estados
+        estados.forEach(e => {
+            const option = document.createElement('option');
+            option.value = e;
+            option.textContent = e;
+            if(e === "{{ request('estado') }}") option.selected = true;
+            estadoSelect.appendChild(option);
+        });
+
+        // Preenche cidades ao mudar estado
+        estadoSelect.addEventListener('change', function() {
+            cidadeSelect.innerHTML = '<option value="">Cidade</option>';
+            if(locationData[this.value]) {
+                locationData[this.value].forEach(c => {
+                    const option = document.createElement('option');
+                    option.value = c;
+                    option.textContent = c;
+                    cidadeSelect.appendChild(option);
+                });
+            }
+        });
+
+        // Se já tiver estado selecionado, dispara change para preencher cidades
+        if(estadoSelect.value) estadoSelect.dispatchEvent(new Event('change'));
+    });
+</script>
 @endsection

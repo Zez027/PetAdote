@@ -1,114 +1,110 @@
 @extends('layouts.app')
 
 @section('content')
-    <h1>{{ isset($pet) ? 'Editar Pet' : 'Novo Pet' }}</h1>
+<div class="container">
+    <h2 class="mb-4">Cadastrar Pet</h2>
 
-    @if($errors->any())
-        <div class="alert alert-danger">
-            <ul class="mb-0">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
-    <form
-        method="POST"
-        action="{{ isset($pet) ? route('pets.update', $pet) : route('pets.store') }}"
-        enctype="multipart/form-data">
+    <form action="{{ route('pets.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
-        @if(isset($pet)) @method('PUT') @endif
 
-        <div class="mb-3">
-            <label>Nome</label>
-            <input type="text" name="nome" class="form-control" value="{{ old('nome', $pet->nome ?? '') }}" required>
-        </div>
+        <div class="row">
 
-        <div class="mb-3">
-            <label>Idade</label>
-            <input type="number" name="idade" class="form-control" value="{{ old('idade', $pet->idade ?? '') }}" required>
-        </div>
+            {{-- Nome --}}
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Nome</label>
+                <input type="text" name="nome" class="form-control" value="{{ old('nome') }}" required>
+            </div>
 
-        <!-- País -->
-        <div class="mb-3">
-            <label for="pais">País</label>
-            <select id="pais" name="pais" class="form-control" required>
-                <option value="Brasil" selected>Brasil</option>
-            </select>
-        </div>
+            {{-- Idade --}}
+            <div class="col-md-3 mb-3">
+                <label class="form-label">Idade</label>
+                <input type="number" name="idade" class="form-control" value="{{ old('idade') }}" required>
+            </div>
 
-        <div class="mb-3">
-        <label class="form-label">Estado *</label>
-            <input 
-                id="estado" 
-                name="estado" 
-                list="lista-estados" 
-                class="form-control" 
-                value="{{ old('estado') }}" 
-                required
-            >
-        <datalist id="lista-estados"></datalist>
-        </div>
+            {{-- Gênero --}}
+            <div class="col-md-3 mb-3">
+                <label class="form-label">Gênero</label>
+                <select name="genero" class="form-control" required>
+                    <option value="">Selecione...</option>
+                    <option value="Macho" {{ old('genero')=='Macho' ? 'selected' : '' }}>Macho</option>
+                    <option value="Fêmea" {{ old('genero')=='Fêmea' ? 'selected' : '' }}>Fêmea</option>
+                </select>
+            </div>
 
-        <div class="mb-3">
-        <label class="form-label">Cidade *</label>
-            <input 
-                id="cidade" 
-                name="cidade" 
-                list="lista-cidades" 
-                class="form-control" 
-                value="{{ old('cidade') }}" 
-                required
-            >
-        <datalist id="lista-cidades"></datalist>
-        </div>
+            {{-- Porte --}}
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Porte</label>
+                <select name="porte" class="form-control" required>
+                    <option value="">Selecione...</option>
+                    <option value="Pequeno" {{ old('porte')=='Pequeno' ? 'selected' : '' }}>Pequeno</option>
+                    <option value="Médio" {{ old('porte')=='Médio' ? 'selected' : '' }}>Médio</option>
+                    <option value="Grande" {{ old('porte')=='Grande' ? 'selected' : '' }}>Grande</option>
+                </select>
+            </div>
 
-        <div class="mb-3">
-            <label>Porte</label>
-            <select name="porte" class="form-control" required>
-                <option value="">Selecione</option>
-                @foreach(['pequeno', 'medio', 'grande'] as $porte)
-                    <option value="{{ $porte }}" {{ old('porte', $pet->porte ?? '') == $porte ? 'selected' : '' }}>
-                        {{ ucfirst($porte) }}
+            {{-- Tipo --}}
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Tipo</label>
+                <select name="tipo" class="form-control" required>
+                    <option value="">Selecione...</option>
+                    @foreach($types as $type)
+                    <option value="{{ $type }}" {{ old('tipo') == $type ? 'selected' : '' }}>
+                        {{ $type }}
                     </option>
-                @endforeach
-            </select>
+                    @endforeach
+                </select>
+            </div>
+
+            {{-- Raça --}}
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Raça</label>
+                <input type="text" name="raca" class="form-control" value="{{ old('raca') }}" required>
+            </div>
+
+            <!-- LOCALIZAÇÃO -->
+            <div class="col-md-4 mb-3">
+                <label class="form-label">País</label>
+                <input type="text" name="pais" class="form-control" value="Brasil" readonly>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Estado</label>
+                <select name="estado" id="estado" class="form-control" data-value="{{ old('estado') }}" required></select>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Cidade</label>
+                <select name="cidade" id="cidade" class="form-control" data-value="{{ old('cidade') }}" required></select>
+            </div>
+
+            {{-- Descrição --}}
+            <div class="col-md-12 mb-3">
+                <label class="form-label">Descrição</label>
+                <textarea name="descricao" class="form-control" rows="3">{{ old('descricao') }}</textarea>
+            </div>
+
+             <!-- Status -->
+             <div class="col-md-3">
+                <select name="status" class="form-select" required>
+                    <option value="">Status</option>
+                    <option value="disponivel" {{ old('status') == 'disponivel' ? 'selected' : '' }}>Disponível</option>
+                    <option value="indisponivel" {{ old('status') == 'indisponivel' ? 'selected' : '' }}>Indisponível</option>
+                    <option value="adotado" {{ old('status') == 'adotado' ? 'selected' : '' }}>Adotado</option>
+                </select>
+            </div>
+
+            {{-- Fotos --}}
+            <div class="col-md-12 mb-3">
+                <label class="form-label">Fotos</label>
+                <input type="file" name="photos[]" class="form-control" multiple>
+            </div>
+
         </div>
 
-        <div class="mb-3">
-            <label>Raça</label>
-            <input type="text" name="raca" class="form-control" value="{{ old('raca', $pet->raca ?? '') }}" required>
-        </div>
+        <button class="btn btn-success w-100">Salvar</button>
 
-        <div class="mb-3">
-            <label>Tipo</label>
-            <input type="text" name="tipo" class="form-control" value="{{ old('tipo', $pet->tipo ?? '') }}" required>
-        </div>
-
-        <div class="mb-3">
-            <label>Descrição</label>
-            <textarea name="descricao" class="form-control">{{ old('descricao', $pet->descricao ?? '') }}</textarea>
-        </div>
-
-        <div class="mb-3">
-            <label>Status</label>
-            <select name="status" class="form-control" required>
-                <option value="">Selecione</option>
-                @foreach(['disponivel', 'indisponivel', 'adotado'] as $status)
-                    <option value="{{ $status }}" {{ old('status', $pet->status ?? '') == $status ? 'selected' : '' }}>
-                        {{ ucfirst($status) }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-
-        <div class="mb-3">
-            <label>Fotos (várias):</label>
-            <input type="file" name="photos[]" multiple class="form-control">
-        </div>
-
-        <button class="btn btn-success">Salvar</button>
     </form>
-    <script src="{{ asset('js/location.js') }}"></script>
+</div>
+
+<script src="/js/location.js"></script>
 @endsection
