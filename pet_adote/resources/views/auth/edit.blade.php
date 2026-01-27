@@ -15,9 +15,27 @@
                     <div class="alert alert-success text-center">{{ session('success') }}</div>
                 @endif
 
-                <form method="POST" action="{{ route('perfil.update') }}">
+                <form method="POST" action="{{ route('perfil.update') }}" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
+
+                    {{-- CAMPO DE FOTO --}}
+                    <div class="mb-4 text-center">
+                        <label class="form-label d-block fw-bold">Foto de Perfil</label>
+                        
+                        @if($user->profile_photo)
+                            <img src="{{ asset('storage/' . $user->profile_photo) }}" 
+                                class="rounded-circle mb-3 border shadow-sm" 
+                                width="100" height="100" style="object-fit: cover;">
+                        @else
+                            <div class="rounded-circle bg-secondary text-white d-inline-flex align-items-center justify-content-center mb-3 shadow-sm" 
+                                style="width: 100px; height: 100px; font-size: 2rem;">
+                                {{ substr($user->name, 0, 1) }}
+                            </div>
+                        @endif
+
+                        <input type="file" name="profile_photo" class="form-control">
+                    </div>
 
                     @foreach(['name','email','cpf','contato'] as $f)
                         <div class="mb-3">

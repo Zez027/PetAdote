@@ -127,25 +127,44 @@
 
     <div class="card shadow-sm border-0 rounded-3 mb-5">
         <div class="card-body">
+            <div class="d-flex align-items-center mb-4">
+                {{-- Foto do Doador --}}
+                @if($pet->user->profile_photo)
+                    <img src="{{ asset('storage/' . $pet->user->profile_photo) }}" 
+                        class="rounded-circle me-3 shadow-sm border" 
+                        width="80" height="80" style="object-fit: cover;">
+                @else
+                    <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center me-3 shadow-sm" 
+                        style="width: 80px; height: 80px; font-size: 2rem;">
+                        {{ substr($pet->user->name, 0, 1) }}
+                    </div>
+                @endif
+
+                <div>
+                    <h4 class="mb-0 fw-bold">{{ $pet->user->name }}</h4>
+                    <p class="text-muted mb-0">
+                        <i class="bi bi-geo-alt-fill text-danger"></i> 
+                        {{ $pet->user->cidade }} - {{ $pet->user->estado }}
+                    </p>
+                </div>
+            </div>
 
             <div class="row">
                 <div class="col-md-6">
-                    <p><strong>Nome:</strong> {{ $pet->user->full_name ?? $pet->user->name }}</p>
-                    <p><strong>Local:</strong> {{ $pet->user->cidade }} - {{ $pet->user->estado }}</p>
-                </div>
-                <div class="col-md-6">
                     @if($pet->user->email)
-                        <p><strong>Email:</strong>
+                        <p><strong>Email:</strong><br>
                             <a href="mailto:{{ $pet->user->email }}" class="text-decoration-none text-success fw-bold">
                                 {{ $pet->user->email }}
                             </a>
                         </p>
                     @endif
-
+                </div>
+                
+                <div class="col-md-6">
                     @if($pet->user->contato)
-                        <p><strong>Whatsapp:</strong>
+                        <p><strong>Whatsapp:</strong><br>
                             <a href="https://wa.me/55{{ preg_replace('/\D/', '', $pet->user->contato) }}"
-                               target="_blank" class="text-decoration-none text-success fw-bold">
+                            target="_blank" class="text-decoration-none text-success fw-bold">
                                 <i class="bi bi-whatsapp"></i> {{ $pet->user->contato }}
                             </a>
                         </p>
@@ -153,18 +172,16 @@
                 </div>
             </div>
 
-            <div class="mt-2">
+            <div class="mt-3 border-top pt-3">
                 @if($pet->user->instagram)
-                    <a href="https://instagram.com/{{ str_replace('@', '', $pet->user->instagram) }}"
-                       target="_blank" class="btn btn-sm btn-outline-secondary me-2">
-                       <i class="bi bi-instagram"></i> Instagram
+                    <a href="{{ $pet->user->instagram }}" target="_blank" class="btn btn-sm btn-outline-secondary me-2">
+                    <i class="bi bi-instagram"></i> Instagram
                     </a>
                 @endif
 
                 @if($pet->user->facebook)
-                    <a href="{{ $pet->user->facebook }}"
-                       target="_blank" class="btn btn-sm btn-outline-primary">
-                       <i class="bi bi-facebook"></i> Facebook
+                    <a href="{{ $pet->user->facebook }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-facebook"></i> Facebook
                     </a>
                 @endif
             </div>

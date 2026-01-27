@@ -18,36 +18,39 @@ class PetController extends Controller
     // LISTAGEM COM FILTROS
     public function index(Request $request)
     {
-        $query = Pet::with('photos')
-            ->where('status', 'disponivel'); // filtra apenas disponíveis
+        $query = Pet::where('status', 'disponivel');
 
-        if ($request->filled('cidade')) {
-            $query->where('cidade', $request->cidade);
+        // Filtro por Nome (Busca textual)
+        if ($request->filled('search')) {
+            $query->where('nome', 'like', '%' . $request->search . '%');
         }
 
-        if ($request->filled('estado')) {
-            $query->where('estado', $request->estado);
-        }
-
+        // Filtro por Espécie (Cão/Gato)
         if ($request->filled('tipo')) {
             $query->where('tipo', $request->tipo);
         }
 
+        // Filtro por Porte
         if ($request->filled('porte')) {
             $query->where('porte', $request->porte);
         }
 
-        if ($request->filled('genero')) {
-            $query->where('genero', $request->genero);
+        // Filtro por Cidade
+        if ($request->filled('cidade')) {
+            $query->where('cidade', $request->cidade);
         }
 
-        if ($request->filled('raca')) {
-            $query->where('raca', 'LIKE', '%' . $request->raca . '%');
-        }
+        // Busca os pets (mais recentes primeiro)
+        $pets = $query->latest()->get();
 
-        $pets = $query->orderBy('created_at', 'desc')->paginate(9)->appends($request->query());
+        // Para preencher o select de cidades apenas com cidades que têm pets
+        $cidades = Pet::where('status', 'disponivel')
+                    ->select('cidade')
+                    ->distinct()
+                    ->orderBy('cidade')
+                    ->pluck('cidade');
 
-        return view('pets.index', compact('pets'));
+        return view('home', compact('pets', 'cidades'));
     }
 
     // FORMULÁRIO DE CADASTRO DE PET
