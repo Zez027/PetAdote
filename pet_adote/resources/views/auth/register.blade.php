@@ -46,17 +46,17 @@
                        {{-- Campo CPF --}}
                         <div class="col-md-6">
                             <label class="form-label">CPF <span class="text-danger">*</span></label>
-                            <input type="text" name="cpf" class="form-control @error('cpf') is-invalid @enderror" 
+                            <input type="cpf" name="cpf" class="form-control @error('cpf') is-invalid @enderror" 
                                 oninput="mascaraCPF(this)" maxlength="14" 
-                                placeholder="122.135.047-17" value="{{ old('cpf') }}" required>
+                                placeholder="000.000.000-00" value="{{ old('cpf') }}" required>
                         </div>
 
                         {{-- Campo Contato --}}
                         <div class="col-md-6">
                             <label class="form-label">Whatsapp / Contato <span class="text-danger">*</span></label>
-                            <input type="text" name="contato" class="form-control @error('contato') is-invalid @enderror" 
-                                oninput="mascaraTelefone(this)" maxlength="18" 
-                                placeholder="(27) 9 9621 - 0936" value="{{ old('contato') }}" required>
+                            <input type="cel" name="contato" class="form-control @error('contato') is-invalid @enderror" 
+                                oninput="mascaraTelefone(this)" maxlength="14" 
+                                placeholder="(00)000000000" value="{{ old('contato') }}" required>
                         </div>
                     </div>
 

@@ -53,6 +53,7 @@ class AuthController extends Controller
             'required' => 'O campo :attribute é obrigatório.',
             'email' => 'O e-mail deve ser um endereço válido.',
             'unique' => 'Este :attribute já está cadastrado.',
+            'cpf' => 'CPF invalido ou cadastrado no sistema',
             'confirmed' => 'A confirmação da senha não confere.',
             'min' => 'O campo :attribute deve ter pelo menos :min caracteres.',
             'url' => 'O link do :attribute deve ser um endereço web válido.',
@@ -103,36 +104,55 @@ class AuthController extends Controller
     }
 
     // --- PERFIL ---
+    // ... dentro da classe AuthController ...
+
+    /**
+     * Exibe o formulário de edição de perfil
+     */
+    public function edit()
+    {
+        $user = auth()->user(); // Pega o usuário logado
+        return view('auth.edit', compact('user'));
+    }
+
+    /**
+     * Processa a atualização dos dados do perfil
+     */
     public function update(Request $request)
     {
         $user = auth()->user();
 
+        // 1. Limpeza visual antes da validação (IGUAL AO REGISTER)
+        $request->merge([
+            'cpf' => preg_replace('/\D/', '', $request->cpf),
+            'contato' => preg_replace('/\D/', '', $request->contato),
+        ]);
+
+        // 2. Validação
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email:rfc,dns|unique:users,email,' . $user->id,
-            
-            // CPF na edição (ignora o próprio usuário na verificação de unique)
-            'cpf' => ['required', 'string', new Cpf, 'unique:users,cpf,' . $user->id],
-            
-            'contato' => 'nullable|string|max:20',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'cpf' => ['required', 'string', 'size:11', new \App\Rules\Cpf, 'unique:users,cpf,' . $user->id],
+            'contato' => 'required|string|max:20',
+            'facebook' => 'nullable|url|max:255',
+            'instagram' => 'nullable|url|max:255',
             'pais' => 'required|string|max:100',
             'estado' => 'required|string|max:100',
             'cidade' => 'required|string|max:100',
-            'facebook' => 'nullable|url',
-            'instagram' => 'nullable|url',
             'profile_photo' => 'nullable|image|max:2048'
         ]);
 
-        // ... (Lógica de upload e update continua igual) ...
+        // 3. Upload da Foto (se houver)
         if ($request->hasFile('profile_photo')) {
             if ($user->profile_photo) {
-                Storage::disk('public')->delete($user->profile_photo);
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($user->profile_photo);
             }
             $data['profile_photo'] = $request->file('profile_photo')->store('profile_photos', 'public');
         }
 
+        // 4. Salva as alterações
         $user->update($data);
 
-        return redirect()->route('perfil.edit')->with('success', 'Dados atualizados com sucesso!');
+        return redirect()->route('perfil.edit')->with('success', 'Perfil atualizado com sucesso!');
     }
 }
