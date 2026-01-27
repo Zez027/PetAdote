@@ -10,7 +10,8 @@ class Pet extends Model
     use HasFactory;
 
     protected $fillable = [
-        'nome', 'idade', 'genero' ,'porte', 'raca', 'tipo', 'pais', 'estado', 'cidade', 'descricao', 'status', 'user_id'
+        'nome', 'idade', 'genero' ,'porte', 'raca', 'tipo', 'pais', 'estado', 'cidade', 'descricao', 'status', 'user_id',
+        'vacinado', 'castrado', 'vermifugado'
     ];
 
     public function user()
@@ -21,5 +22,16 @@ class Pet extends Model
     public function photos()
     {
         return $this->hasMany(PetPhoto::class);
+    }
+
+    public function adoptionRequests()
+    {
+        return $this->hasMany(AdoptionRequest::class);
+    }
+
+    // Relação: Um pet pode ser favoritado por vários usuários
+    public function favoritedBy()
+    {
+        return $this->belongsToMany(User::class, 'favorites');
     }
 }

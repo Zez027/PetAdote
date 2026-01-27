@@ -83,6 +83,27 @@
                 <textarea name="descricao" class="form-control" rows="3">{{ old('descricao') }}</textarea>
             </div>
 
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="vacinado" id="vacinado">
+                        <label class="form-check-label" for="vacinado">Vacinado</label>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="castrado" id="castrado">
+                        <label class="form-check-label" for="castrado">Castrado</label>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="vermifugado" id="vermifugado">
+                        <label class="form-check-label" for="vermifugado">Vermifugado</label>
+                    </div>
+                </div>
+            </div>
+
              <!-- Status -->
              <div class="col-md-3">
                 <select name="status" class="form-select" required>

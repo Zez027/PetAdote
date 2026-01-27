@@ -31,8 +31,10 @@
 
                 @auth
                     <li class="nav-item"><a class="nav-link" href="{{ route('perfil.edit') }}">Meu Perfil</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('pets.meus') }}">Meus Pets</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ route('pets.create') }}">Novo Pet</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('pets.meus') }}">Meus Pets</a></li>
+                    <li class="nav-item"><a class="nav-link text-danger" href="{{ route('pets.favoritos') }}"><i class="bi bi-heart"></i> Favoritos</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('adoptions.index') }}">Solicitações Recebidas</a></li>
 
                     <li class="nav-item">
                         <form method="POST" action="{{ route('logout') }}">

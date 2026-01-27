@@ -103,6 +103,12 @@ class PetController extends Controller
             'status'    => $request->status,
         ]);
 
+        $data = $request->all();
+        // Checkbox não marcado não envia valor, então forçamos false se não vier
+        $data['vacinado'] = $request->has('vacinado');
+        $data['castrado'] = $request->has('castrado');
+        $data['vermifugado'] = $request->has('vermifugado');
+
         if ($request->hasFile('photos')) {
             foreach ($request->file('photos') as $photo) {
                 $path = $photo->store('pets', 'public');
@@ -110,7 +116,9 @@ class PetController extends Controller
             }
         }
 
-        return redirect()->route('pets.meus')->with('success', 'Pet cadastrado com sucesso!');
+        Pet::create($data);
+
+        return redirect()->route('pets.index')->with('success', 'Pet cadastrado!');
     }
 
     // LISTAR MEUS PETS
@@ -129,6 +137,14 @@ class PetController extends Controller
     {
         $pet = Pet::with('photos', 'user')->findOrFail($id);
         return view('pets.show', compact('pet'));
+    }
+
+    public function favoritos()
+    {
+        // Usa o relacionamento 'favorites' que criamos no Model User
+        $pets = auth()->user()->favorites()->latest()->get();
+        
+        return view('pets.favoritos', compact('pets'));
     }
 
     // FORMULÁRIO DE EDIÇÃO

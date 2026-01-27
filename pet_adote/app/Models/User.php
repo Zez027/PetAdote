@@ -23,4 +23,11 @@ class User extends Authenticatable
     {
         return $this->hasMany(Pet::class);
     }
+
+    // Pets que o usuário favoritou
+    public function favorites()
+    {
+        // Define que a relação usa a tabela 'favorites' criada no banco
+        return $this->belongsToMany(Pet::class, 'favorites')->withTimestamps();
+    }
 }
