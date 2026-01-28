@@ -58,59 +58,51 @@ class PetController extends Controller
     }
 
     // SALVAR PET
-    public function store(Request $request)
+   public function store(Request $request)
     {
-        $request->validate([
-            'nome'      => 'required|string|max:255',
-            'idade'     => 'required|integer',
-            'genero'    => 'required|string',
-            'porte'     => 'required|string',
-            'tipo'      => 'required|string|max:255',
-            'raca'      => 'required|string|max:255',
-            'descricao' => 'nullable|string',
-            'status'    => 'required|in:disponivel,indisponivel,adotado',
-
-            // LOCALIZAÇÃO (required)
-            'pais'      => 'required|string',
-            'estado'    => 'required|string',
-            'cidade'    => 'required|string',
-
-            'photos.*'  => 'image|max:2048'
+        // 1. Validação
+        $data = $request->validate([
+            'nome' => 'required|string|max:255',
+            'idade' => 'required|integer',
+            'genero' => 'required|string',
+            'porte' => 'required|string',
+            'tipo' => 'required|string',
+            'raca' => 'required|string',
+            'descricao' => 'required|string',
+            'pais' => 'required|string',
+            'estado' => 'required|string',
+            'cidade' => 'required|string',
+            'vacinado' => 'nullable',
+            'castrado' => 'nullable',
+            'vermifugado' => 'nullable',
+            'photos.*' => 'image|max:2048' // Valida cada foto
         ]);
 
-        $pet = Pet::create([
-            'user_id'   => auth()->id(),
-            'nome'      => $request->nome,
-            'idade'     => $request->idade,
-            'genero'    => $request->genero,
-            'porte'     => $request->porte,
-            'tipo'      => $request->tipo,
-            'raca'      => $request->raca,
-            'descricao' => $request->descricao,
-
-            'pais'      => $request->pais,
-            'estado'    => $request->estado,
-            'cidade'    => $request->cidade,
-
-            'status'    => $request->status,
-        ]);
-
-        $data = $request->all();
-        // Checkbox não marcado não envia valor, então forçamos false se não vier
+        // 2. Tratamento dos Checkboxes (vacinado, castrado, vermifugado)
         $data['vacinado'] = $request->has('vacinado');
         $data['castrado'] = $request->has('castrado');
         $data['vermifugado'] = $request->has('vermifugado');
+        $data['status'] = 'disponivel';
 
+        // 3. AQUI ESTÁ O SEGREDO: Vincular o usuário logado
+        $data['user_id'] = auth()->id();
+
+        // 4. Criar o Pet primeiro
+        $pet = Pet::create($data);
+
+        // 5. Agora que o Pet existe ($pet->id), salvamos as fotos
         if ($request->hasFile('photos')) {
-            foreach ($request->file('photos') as $photo) {
+            foreach ($request->file('photos') as $index => $photo) {
                 $path = $photo->store('pets', 'public');
-                $pet->photos()->create(['foto' => $path]);
+                
+                $pet->photos()->create([
+                    'foto' => $path,
+                    'is_main' => ($index === 0) // Define a primeira foto como principal automaticamente
+                ]);
             }
         }
 
-        Pet::create($data);
-
-        return redirect()->route('pets.index')->with('success', 'Pet cadastrado!');
+        return redirect()->route('pets.meus')->with('success', 'Pet cadastrado com sucesso!');
     }
 
     // LISTAR MEUS PETS
@@ -222,24 +214,26 @@ class PetController extends Controller
     }
 
     // EXCLUIR PET
-    public function destroy($id)
+   public function destroy($id)
     {
-        $pet = Pet::with('photos')->findOrFail($id);
+        $pet = Pet::findOrFail($id);
 
-        if ($pet->user_id != Auth::id()) {
-            abort(403, 'Acesso negado');
+        // Segurança: só o dono deleta
+        if ($pet->user_id != auth()->id()) {
+            abort(403);
         }
 
+        // Deletar arquivos físicos das fotos
         foreach ($pet->photos as $photo) {
-            if (Storage::disk('public')->exists($photo->foto)) {
-                Storage::disk('public')->delete($photo->foto);
+            if (\Storage::disk('public')->exists($photo->foto)) {
+                \Storage::disk('public')->delete($photo->foto);
             }
-            $photo->delete();
         }
 
         $pet->delete();
 
-        return redirect()->route('pets.index')->with('success', 'Pet removido com sucesso!');
+        // ALTERAÇÃO AQUI: redirecionar para 'pets.meus'
+        return redirect()->route('pets.meus')->with('success', 'Pet removido com sucesso!');
     }
 
     // EXCLUIR FOTO
