@@ -122,3 +122,35 @@ a:hover {
     font-weight: bold;
 }
 
+/* Padronização dos Cards de Pets */
+.pet-card-img {
+    height: 250px; /* Altura fixa para todas as fotos */
+    object-fit: cover; /* Faz a imagem preencher o espaço sem distorcer */
+    transition: transform 0.3s ease;
+}
+
+.hover-card:hover .pet-card-img {
+    transform: scale(1.05); /* Efeito de zoom suave ao passar o mouse */
+}
+
+.hover-card {
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+    border-radius: 15px !important;
+    overflow: hidden;
+}
+
+.hover-card:hover {
+    box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
+    transform: translateY(-5px); /* Card sobe levemente */
+}
+
+.badge-porte {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+    font-weight: bold;
+    backdrop-filter: blur(4px);
+}
+

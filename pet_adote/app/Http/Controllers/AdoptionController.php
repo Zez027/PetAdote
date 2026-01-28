@@ -38,17 +38,27 @@ class AdoptionController extends Controller
     {
         $request = AdoptionRequest::findOrFail($id);
         
-        // Verifica se o usuário é realmente dono do pet
+        // Segurança: Apenas o dono do pet pode aprovar
         if ($request->pet->user_id !== auth()->id()) {
             abort(403);
         }
-
-        $request->update(['status' => 'aprovado']);
-        
-        // Opcional: Atualizar status do pet para "em processo" ou "adotado"
-        // $request->pet->update(['status' => 'adotado']); 
-
-        return back()->with('success', 'Adoção aprovada! Entre em contato com o adotante.');
+    
+        // Usamos uma Transaction para garantir que todas as mudanças ocorram juntas
+        \DB::transaction(function () use ($request) {
+            // 1. Aprova esta solicitação
+            $request->update(['status' => 'aprovado']);
+    
+            // 2. Marca o Pet como Adotado (ele sumirá da Home se você filtrar por status 'disponivel')
+            $request->pet->update(['status' => 'adotado']);
+    
+            // 3. Opcional: Rejeita automaticamente as outras solicitações pendentes para este mesmo pet
+            AdoptionRequest::where('pet_id', $request->pet_id)
+                ->where('id', '!=', $request->id)
+                ->where('status', 'pendente')
+                ->update(['status' => 'rejeitado']);
+        });
+    
+        return back()->with('success', 'Adoção aprovada! O pet foi marcado como adotado e o adotante já pode ver o seu contacto.');
     }
 
     // 3. REJEITAR PEDIDO
@@ -63,5 +73,15 @@ class AdoptionController extends Controller
         $request->update(['status' => 'rejeitado']);
 
         return back()->with('success', 'Solicitação rejeitada.');
+    }
+
+    public function meusPedidos()
+    {
+        $pedidos = AdoptionRequest::where('user_id', auth()->id())
+                    ->with('pet.photos')
+                    ->latest()
+                    ->get();
+
+        return view('adoptions.meus-pedidos', compact('pedidos'));
     }
 }

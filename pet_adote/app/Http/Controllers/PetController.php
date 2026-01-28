@@ -18,37 +18,26 @@ class PetController extends Controller
     // LISTAGEM COM FILTROS
     public function index(Request $request)
     {
-        $query = Pet::where('status', 'disponivel');
+        $query = Pet::with(['photos', 'user'])->where('status', 'disponivel');
 
-        // Filtro por Nome (Busca textual)
+        // Filtros
         if ($request->filled('search')) {
             $query->where('nome', 'like', '%' . $request->search . '%');
         }
-
-        // Filtro por Espécie (Cão/Gato)
         if ($request->filled('tipo')) {
             $query->where('tipo', $request->tipo);
         }
-
-        // Filtro por Porte
         if ($request->filled('porte')) {
             $query->where('porte', $request->porte);
         }
-
-        // Filtro por Cidade
         if ($request->filled('cidade')) {
             $query->where('cidade', $request->cidade);
         }
 
-        // Busca os pets (mais recentes primeiro)
         $pets = $query->latest()->get();
 
-        // Para preencher o select de cidades apenas com cidades que têm pets
-        $cidades = Pet::where('status', 'disponivel')
-                    ->select('cidade')
-                    ->distinct()
-                    ->orderBy('cidade')
-                    ->pluck('cidade');
+        // Pega as cidades dinamicamente para o filtro
+        $cidades = Pet::where('status', 'disponivel')->distinct()->pluck('cidade');
 
         return view('home', compact('pets', 'cidades'));
     }
@@ -138,7 +127,7 @@ class PetController extends Controller
     // MOSTRAR PET
     public function show($id)
     {
-        $pet = Pet::with('photos', 'user')->findOrFail($id);
+        $pet = Pet::with(['photos', 'user'])->findOrFail($id);
         return view('pets.show', compact('pet'));
     }
 
