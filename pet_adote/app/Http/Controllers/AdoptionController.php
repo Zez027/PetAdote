@@ -2,86 +2,104 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\Pet;
 use App\Models\AdoptionRequest;
+use App\Models\Pet;
+use App\Http\Requests\StoreAdoptionRequest; // Importando o novo Request
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AdoptionController extends Controller
 {
-    public function store($petId)
-    {
-        AdoptionRequest::create([
-            'user_id' => auth()->id(),
-            'pet_id' => $petId,
-            'status' => 'pendente'
-        ]);
-
-        return back()->with('success', 'Pedido de adoção enviado com sucesso!');
-    }
-
+    /**
+     * Lista solicitações recebidas (Doador vê quem quer adotar seus pets).
+     */
     public function index()
     {
-        // Busca todos os pedidos onde o pet pertence ao usuário logado
-        $requests = AdoptionRequest::whereHas('pet', function($query) {
-            $query->where('user_id', auth()->id());
+        $requests = AdoptionRequest::whereHas('pet', function ($query) {
+            $query->where('user_id', Auth::id());
         })
-        ->with(['pet', 'user']) // Carrega dados do pet e de quem quer adotar
+        ->with(['pet', 'user'])
         ->latest()
-        ->get();
+        ->paginate(10); // Melhoria: Paginação
 
         return view('adoptions.index', compact('requests'));
     }
 
-    // 2. APROVAR PEDIDO
-    public function approve($id)
+    /**
+     * Cria uma nova solicitação com as validações solicitadas.
+     */
+    public function store(StoreAdoptionRequest $request)
     {
-        $request = AdoptionRequest::findOrFail($id);
+        // A validação do pet_id já aconteceu via StoreAdoptionRequest
         
-        // Segurança: Apenas o dono do pet pode aprovar
-        if ($request->pet->user_id !== auth()->id()) {
-            abort(403);
-        }
-    
-        // Usamos uma Transaction para garantir que todas as mudanças ocorram juntas
-        \DB::transaction(function () use ($request) {
-            // 1. Aprova esta solicitação
-            $request->update(['status' => 'aprovado']);
-    
-            // 2. Marca o Pet como Adotado (ele sumirá da Home se você filtrar por status 'disponivel')
-            $request->pet->update(['status' => 'adotado']);
-    
-            // 3. Opcional: Rejeita automaticamente as outras solicitações pendentes para este mesmo pet
-            AdoptionRequest::where('pet_id', $request->pet_id)
-                ->where('id', '!=', $request->id)
-                ->where('status', 'pendente')
-                ->update(['status' => 'rejeitado']);
-        });
-    
-        return back()->with('success', 'Adoção aprovada! O pet foi marcado como adotado e o adotante já pode ver o seu contacto.');
-    }
+        $pet = Pet::findOrFail($request->pet_id);
+        $userId = Auth::id();
 
-    // 3. REJEITAR PEDIDO
-    public function reject($id)
-    {
-        $request = AdoptionRequest::findOrFail($id);
-        
-        if ($request->pet->user_id !== auth()->id()) {
-            abort(403);
+        // Melhoria: impede adotar o próprio pet
+        if ($pet->user_id === $userId) {
+            return redirect()->back()->with('error', 'Você não pode solicitar a adoção do seu próprio pet.');
         }
 
-        $request->update(['status' => 'rejeitado']);
+        // Melhoria: Validação de Solicitação Duplicada
+        $exists = AdoptionRequest::where('user_id', $userId)
+            ->where('pet_id', $request->pet_id)
+            ->whereIn('status', ['pendente', 'aprovado'])
+            ->exists();
 
-        return back()->with('success', 'Solicitação rejeitada.');
+        if ($exists) {
+            return redirect()->back()->with('error', 'Você já possui uma solicitação ativa para este pet.');
+        }
+
+        AdoptionRequest::create([
+            'user_id' => $userId,
+            'pet_id'  => $request->pet_id,
+            'status'  => 'pendente',
+        ]);
+
+        return redirect()->back()->with('success', 'Solicitação de adoção enviada com sucesso!');
     }
 
+    /**
+     * Lista as solicitações feitas pelo usuário (Adotante vê seus pedidos).
+     */
     public function meusPedidos()
     {
-        $pedidos = AdoptionRequest::where('user_id', auth()->id())
-                    ->with('pet.photos')
-                    ->latest()
-                    ->get();
+        $requests = AdoptionRequest::where('user_id', Auth::id())
+            ->with('pet')
+            ->latest()
+            ->paginate(10); // Melhoria: Paginação
 
-        return view('adoptions.meus-pedidos', compact('pedidos'));
+        return view('adoptions.meus-pedidos', compact('requests'));
+    }
+
+    /**
+     * Aprova uma solicitação.
+     */
+   public function approve(AdoptionRequest $adoptionRequest)
+    {
+        // Chama a Policy. Se falhar, o Laravel lança um erro 403 automaticamente.
+        $this->authorize('update', $adoptionRequest);
+
+        $adoptionRequest->update(['status' => 'aprovado']);
+
+        // Rejeita outros interessados no mesmo pet
+        AdoptionRequest::where('pet_id', $adoptionRequest->pet_id)
+            ->where('id', '!=', $adoptionRequest->id)
+            ->where('status', 'pendente')
+            ->update(['status' => 'rejeitado']);
+
+        return redirect()->back()->with('success', 'Adoção aprovada com sucesso!');
+    }
+
+    /**
+     * Rejeita uma solicitação de adoção.
+     */
+    public function reject(AdoptionRequest $adoptionRequest)
+    {
+        $this->authorize('update', $adoptionRequest);
+
+        $adoptionRequest->update(['status' => 'rejeitado']);
+
+        return redirect()->back()->with('success', 'Solicitação rejeitada.');
     }
 }

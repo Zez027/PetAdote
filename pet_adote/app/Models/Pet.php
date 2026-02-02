@@ -4,10 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Pet extends Model
 {
     use HasFactory;
+    use SoftDeletes;
+    
 
     protected $fillable = [
         'nome', 'idade', 'genero' ,'porte', 'raca', 'tipo', 'pais', 'estado', 'cidade', 'descricao', 'status', 'user_id',

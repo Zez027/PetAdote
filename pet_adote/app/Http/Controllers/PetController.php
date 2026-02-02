@@ -119,7 +119,7 @@ class PetController extends Controller
     // MOSTRAR PET
     public function show($id)
     {
-        $pet = Pet::with(['photos', 'user'])->findOrFail($id);
+        $pet = Pet::withTrashed()->with(['photos', 'user'])->findOrFail($id);
         return view('pets.show', compact('pet'));
     }
 
@@ -214,7 +214,7 @@ class PetController extends Controller
     }
 
     // EXCLUIR PET
-   public function destroy($id)
+    public function destroy($id)
     {
         $pet = Pet::findOrFail($id);
 
@@ -223,17 +223,9 @@ class PetController extends Controller
             abort(403);
         }
 
-        // Deletar arquivos físicos das fotos
-        foreach ($pet->photos as $photo) {
-            if (\Storage::disk('public')->exists($photo->foto)) {
-                \Storage::disk('public')->delete($photo->foto);
-            }
-        }
+        $pet->delete(); // Isso agora apenas preenche a coluna 'deleted_at'
 
-        $pet->delete();
-
-        // ALTERAÇÃO AQUI: redirecionar para 'pets.meus'
-        return redirect()->route('pets.meus')->with('success', 'Pet removido com sucesso!');
+        return redirect()->route('pets.meus')->with('success', 'Pet removido com sucesso (Histórico preservado).');
     }
 
     // EXCLUIR FOTO

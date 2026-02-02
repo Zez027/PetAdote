@@ -6,11 +6,22 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\AdoptionController;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use Illuminate\Http\Request;
 
-// Rota principal (Home) - Aberta para todos
+/*
+|--------------------------------------------------------------------------
+| Rotas Públicas
+|--------------------------------------------------------------------------
+*/
 Route::get('/', [PetController::class, 'index'])->name('home');
+Route::get('/pets/{pet}', [PetController::class, 'show'])->name('pets.show');
 
-// Rotas para visitantes (Apenas usuários NÃO logados)
+/*
+|--------------------------------------------------------------------------
+| Rotas para Visitantes (Não Logados)
+|--------------------------------------------------------------------------
+*/
 Route::middleware('guest')->group(function () {
     Route::view('/login', 'auth.login')->name('login');
     Route::post('/login', [AuthController::class, 'login']);
@@ -25,40 +36,63 @@ Route::middleware('guest')->group(function () {
     Route::post('/password/reset', [PasswordResetController::class, 'reset'])->name('password.update');
 });
 
-// Rotas para usuários logados
+/*
+|--------------------------------------------------------------------------
+| Rotas para Usuários Autenticados
+|--------------------------------------------------------------------------
+*/
 Route::middleware('auth')->group(function () {
-    
-    // --- Autenticação e Perfil ---
+
+    // --- Fluxo de Verificação de E-mail ---
+    // Tela que avisa o usuário para verificar o e-mail
+    Route::get('/email/verify', function () {
+        return view('auth.verify-email');
+    })->name('verification.notice');
+
+    // Processa o clique no link enviado por e-mail (Assinado/Signed)
+    Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+        $request->fulfill();
+        return redirect()->route('home')->with('success', 'E-mail verificado com sucesso!');
+    })->middleware(['signed'])->name('verification.verify');
+
+    // Reenviar e-mail de verificação (Throttle limita o envio para evitar spam)
+    Route::post('/email/verification-notification', function (Request $request) {
+        $request->user()->sendEmailVerificationNotification();
+        return back()->with('message', 'Link de verificação reenviado!');
+    })->middleware(['throttle:6,1'])->name('verification.send');
+
+
+    // --- Perfil e Logout ---
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/perfil/edit', [AuthController::class, 'edit'])->name('perfil.edit');
     Route::put('/perfil/update', [AuthController::class, 'update'])->name('perfil.update');
 
-    // --- Gerenciamento de Pets (Doador) ---
+
+    // --- Rotas Protegidas (Exigem E-mail Verificado) ---
+    // Somente usuários com e-mail ativo podem criar pets ou solicitar adoções
+    Route::middleware(['verified'])->group(function () {
+        
+        // Gerenciamento de Pets (Doador)
+        Route::get('/pets/create', [PetController::class, 'create'])->name('pets.create');
+        Route::post('/pets', [PetController::class, 'store'])->name('pets.store');
+        Route::get('/pets/{pet}/edit', [PetController::class, 'edit'])->name('pets.edit');
+        Route::put('/pets/{pet}', [PetController::class, 'update'])->name('pets.update');
+        Route::delete('/pets/{pet}', [PetController::class, 'destroy'])->name('pets.destroy');
+
+        // Fotos
+        Route::post('/pets/photo/{photo}/main', [PetController::class, 'setMainPhoto'])->name('pets.photo.main');
+        Route::delete('/pets/photo/{photo}', [PetController::class, 'deletePhoto'])->name('pets.photo.delete');
+
+        // Fluxo de Adoção
+        Route::post('/pets/{id}/adopt', [AdoptionController::class, 'store'])->name('adocoes.store');
+        Route::get('/solicitacoes', [AdoptionController::class, 'index'])->name('adoptions.index');
+        Route::post('/solicitacoes/{id}/aprovar', [AdoptionController::class, 'approve'])->name('adoptions.approve');
+        Route::post('/solicitacoes/{id}/rejeitar', [AdoptionController::class, 'reject'])->name('adoptions.reject');
+    });
+
+    // --- Outras Consultas do Usuário ---
     Route::get('/meus-pets', [PetController::class, 'meusPets'])->name('pets.meus');
-    Route::get('/pets/create', [PetController::class, 'create'])->name('pets.create');
-    Route::post('/pets', [PetController::class, 'store'])->name('pets.store');
-    Route::get('/pets/{pet}/edit', [PetController::class, 'edit'])->name('pets.edit');
-    Route::put('/pets/{pet}', [PetController::class, 'update'])->name('pets.update');
-    Route::delete('/pets/{pet}', [PetController::class, 'destroy'])->name('pets.destroy');
-
-    // --- Visualização e Fotos (Público Logado) ---
-    Route::get('/pets/{pet}', [PetController::class, 'show'])->name('pets.show');
-    Route::post('/pets/photo/{photo}/main', [PetController::class, 'setMainPhoto'])->name('pets.photo.main');
-    Route::delete('/pets/photo/{photo}', [PetController::class, 'deletePhoto'])->name('pets.photo.delete');
-
-    // --- Favoritos ---
     Route::get('/meus-favoritos', [PetController::class, 'favoritos'])->name('pets.favoritos');
     Route::post('/pets/{id}/favorite', [FavoriteController::class, 'toggle'])->name('pets.favorite');
-
-    //Solicitacoes de adocao
     Route::get('/meus-pedidos', [AdoptionController::class, 'meusPedidos'])->name('adoptions.meus_pedidos');
-
-    // --- Fluxo de Adoção (Solicitações) ---
-    // Nomeado como 'adocoes.store' para casar com o formulário da show.blade
-    Route::post('/pets/{id}/adopt', [AdoptionController::class, 'store'])->name('adocoes.store');
-    
-    // Painel de Controle do Doador (Ver quem quer adotar)
-    Route::get('/solicitacoes', [AdoptionController::class, 'index'])->name('adoptions.index');
-    Route::post('/solicitacoes/{id}/aprovar', [AdoptionController::class, 'approve'])->name('adoptions.approve');
-    Route::post('/solicitacoes/{id}/rejeitar', [AdoptionController::class, 'reject'])->name('adoptions.reject');
 });

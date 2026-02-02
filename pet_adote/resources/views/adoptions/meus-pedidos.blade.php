@@ -11,7 +11,7 @@
         <p class="text-muted">Acompanhe aqui o status das suas solicitações de adoção.</p>
     </div>
 
-    @if($pedidos->isEmpty())
+    @if($requests->isEmpty())
         <div class="card border-0 shadow-sm rounded-4 p-5 text-center">
             <div class="mb-3">
                 <i class="bi bi-send-exclamation text-muted" style="font-size: 3.5rem;"></i>
@@ -24,17 +24,17 @@
         </div>
     @else
         <div class="row g-4">
-            @foreach($pedidos as $pedido)
+            @foreach($requests as $pedido)
                 <div class="col-md-6 col-lg-4">
                     <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden hover-up">
                         
                         {{-- Topo do Card: Foto do Pet --}}
                         <div class="position-relative" style="height: 180px;">
-                            @php
+                             @php
                                 $foto = $pedido->pet->photos->where('is_main', true)->first() ?? $pedido->pet->photos->first();
                                 $urlFoto = $foto ? asset('storage/' . $foto->foto) : asset('images/sem-foto.png');
                             @endphp
-                            <img src="{{ $urlFoto }}" class="w-100 h-100" style="object-fit: cover;" alt="{{ $pedido->pet->nome }}">
+                            <img src="{{ $urlFoto }}" class="w-100 h-100" style="object-fit: cover;" alt="{{ $pedido->pet->name }}">
                             
                             {{-- Badge de Status Flutuante --}}
                             <div class="position-absolute top-0 end-0 m-3">
@@ -55,9 +55,9 @@
                         </div>
 
                         <div class="card-body p-4">
-                            <h5 class="fw-bold text-dark mb-1">{{ $pedido->pet->nome }}</h5>
+                            <h5 class="fw-bold text-dark mb-1">{{ $pedido->pet->name }}</h5>
                             <p class="text-muted small mb-3">
-                                <i class="bi bi-geo-alt me-1"></i> {{ $pedido->pet->cidade }} - {{ $pedido->pet->estado }}
+                                <i class="bi bi-geo-alt me-1"></i> {{ $pedido->pet->city ?? $pedido->pet->cidade }} - {{ $pedido->pet->state ?? $pedido->pet->estado }}
                             </p>
 
                             <div class="d-flex align-items-center mb-4 p-2 bg-light rounded-3">
@@ -76,7 +76,12 @@
                                 </a>
 
                                 @if($pedido->status == 'aprovado')
-                                    <a href="https://wa.me/55{{ preg_replace('/\D/', '', $pedido->pet->user->contato) }}" 
+                                    @php
+                                        // Limpa o número para o link do WhatsApp
+                                        $contato = $pedido->pet->user->phone ?? $pedido->pet->user->contato;
+                                        $whatsapp = preg_replace('/\D/', '', $contato);
+                                    @endphp
+                                    <a href="https://wa.me/55{{ $whatsapp }}" 
                                        target="_blank" class="btn btn-success rounded-pill fw-bold shadow-sm">
                                         <i class="bi bi-whatsapp me-2"></i> Chamar no Whats
                                     </a>
@@ -92,6 +97,11 @@
                     </div>
                 </div>
             @endforeach
+        </div>
+
+        {{-- Adicionado paginação que faltava no seu original --}}
+        <div class="mt-4 d-flex justify-content-center">
+            {{ $requests->links() }}
         </div>
     @endif
 </div>

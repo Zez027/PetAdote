@@ -2,33 +2,100 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\Rules\Password;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Auth\Events\Registered;
 use App\Rules\Cpf;
 
 class AuthController extends Controller
 {
-    // --- LOGIN ---
-    public function login(Request $request)
+    /**
+     * LOGIN com Rate Limiting
+     */
+    public function login(Request $request) 
     {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
         ]);
 
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
-            return redirect()->intended(route('home'));
+        $throttleKey = strtolower($request->input('email')) . '|' . $request->ip();
+
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+            throw ValidationException::withMessages([
+                'email' => "Muitas tentativas. Tente novamente em $seconds segundos.",
+            ]);
         }
 
-        return back()->withErrors([
-            'email' => 'As credenciais fornecidas estão incorretas.',
-        ])->onlyInput('email');
+        if (Auth::attempt($request->only('email', 'password'), $request->filled('remember'))) {
+            RateLimiter::clear($throttleKey);
+            $request->session()->regenerate();
+            return redirect()->intended('/home');
+        }
+
+        RateLimiter::hit($throttleKey);
+        return back()->withErrors(['email' => 'Credenciais inválidas.'])->onlyInput('email');
+    }
+
+    /**
+     * CADASTRO com disparo de Verificação de E-mail
+     */
+    public function register(Request $request)
+    {
+        $request->merge([
+            'cpf' => preg_replace('/\D/', '', $request->cpf),
+            'contato' => preg_replace('/\D/', '', $request->contato),
+        ]);
+
+        $messages = [
+            'required' => 'O campo :attribute é obrigatório.',
+            'unique' => 'Este :attribute já está cadastrado.',
+            'cpf' => 'CPF inválido ou já cadastrado.',
+            'confirmed' => 'A confirmação da senha não confere.',
+            'password.min' => 'A senha deve ter pelo menos 8 caracteres.',
+        ];
+
+        $attributes = [
+            'name' => 'nome',
+            'password' => 'senha',
+            'contato' => 'whatsapp',
+        ];
+
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users',
+            'cpf' => ['required', 'string', 'size:11', new Cpf, 'unique:users'],
+            'password' => [
+                'required', 'confirmed',
+                \Illuminate\Validation\Rules\Password::min(8)->letters()->numbers()->symbols(),
+            ],
+            'contato' => 'required|string|max:20',
+            'pais' => 'required|string|max:100',
+            'estado' => 'required|string|max:100',
+            'cidade' => 'required|string|max:100',
+            'profile_photo' => 'nullable|image|max:2048'
+        ], $messages, $attributes);
+
+        $data['password'] = Hash::make($data['password']);
+
+        if ($request->hasFile('profile_photo')) {
+            $data['profile_photo'] = $request->file('profile_photo')->store('profile_photos', 'public');
+        }
+
+        $user = User::create($data);
+
+        // Gatilho para enviar o e-mail de verificação
+        event(new Registered($user));
+
+        Auth::login($user);
+
+        return redirect()->route('verification.notice');
     }
 
     public function logout(Request $request)
@@ -39,120 +106,41 @@ class AuthController extends Controller
         return redirect('/');
     }
 
-    // --- CADASTRO (REGISTER) ---
-    public function register(Request $request)
-    {
-        // 1. Limpeza: Remove tudo que não é número do CPF e Contato antes de validar
-        $request->merge([
-            'cpf' => preg_replace('/\D/', '', $request->cpf),
-            'contato' => preg_replace('/\D/', '', $request->contato),
-        ]);
-
-        // 2. Mensagens personalizadas em Português
-        $messages = [
-            'required' => 'O campo :attribute é obrigatório.',
-            'email' => 'O e-mail deve ser um endereço válido.',
-            'unique' => 'Este :attribute já está cadastrado.',
-            'cpf' => 'CPF invalido ou cadastrado no sistema',
-            'confirmed' => 'A confirmação da senha não confere.',
-            'min' => 'O campo :attribute deve ter pelo menos :min caracteres.',
-            'url' => 'O link do :attribute deve ser um endereço web válido.',
-            'password.min' => 'A senha deve ter mais de 8 caracteres.',
-            'password.mixed' => 'A senha deve conter letras maiúsculas e minúsculas.',
-            'password.symbols' => 'A senha deve conter pelo menos um caractere especial (!, @, #, etc).',
-        ];
-
-        // Nomes amigáveis para os erros
-        $attributes = [
-            'name' => 'nome',
-            'password' => 'senha',
-            'contato' => 'whatsapp',
-            'profile_photo' => 'foto de perfil'
-        ];
-
-        // 3. Validação robusta
-        $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users',
-            'cpf' => ['required', 'string', 'size:11', new \App\Rules\Cpf, 'unique:users'],
-            'password' => [
-                'required',
-                'confirmed',
-                \Illuminate\Validation\Rules\Password::min(9)->mixedCase()->symbols()
-            ],
-            'contato' => 'required|string|max:20',
-            'facebook' => 'nullable|url|max:255',
-            'instagram' => 'nullable|url|max:255',
-            'pais' => 'required|string|max:100',
-            'estado' => 'required|string|max:100',
-            'cidade' => 'required|string|max:100',
-            'profile_photo' => 'nullable|image|max:2048'
-        ], $messages, $attributes);
-
-        // 4. Preparação e salvamento
-        $data['password'] = \Illuminate\Support\Facades\Hash::make($data['password']);
-
-        if ($request->hasFile('profile_photo')) {
-            $data['profile_photo'] = $request->file('profile_photo')->store('profile_photos', 'public');
-        }
-
-        $user = \App\Models\User::create($data);
-
-        \Illuminate\Support\Facades\Auth::login($user);
-
-        return redirect()->route('home')->with('success', 'Bem-vindo! Sua conta foi criada com sucesso.');
-    }
-
-    // --- PERFIL ---
-    // ... dentro da classe AuthController ...
-
-    /**
-     * Exibe o formulário de edição de perfil
-     */
     public function edit()
     {
-        $user = auth()->user(); // Pega o usuário logado
+        $user = auth()->user();
         return view('auth.edit', compact('user'));
     }
 
-    /**
-     * Processa a atualização dos dados do perfil
-     */
     public function update(Request $request)
     {
         $user = auth()->user();
 
-        // 1. Limpeza visual antes da validação (IGUAL AO REGISTER)
         $request->merge([
             'cpf' => preg_replace('/\D/', '', $request->cpf),
             'contato' => preg_replace('/\D/', '', $request->contato),
         ]);
 
-        // 2. Validação
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
-            'cpf' => ['required', 'string', 'size:11', new \App\Rules\Cpf, 'unique:users,cpf,' . $user->id],
+            'cpf' => ['required', 'string', 'size:11', new Cpf, 'unique:users,cpf,' . $user->id],
             'contato' => 'required|string|max:20',
-            'facebook' => 'nullable|url|max:255',
-            'instagram' => 'nullable|url|max:255',
             'pais' => 'required|string|max:100',
             'estado' => 'required|string|max:100',
             'cidade' => 'required|string|max:100',
             'profile_photo' => 'nullable|image|max:2048'
         ]);
 
-        // 3. Upload da Foto (se houver)
         if ($request->hasFile('profile_photo')) {
             if ($user->profile_photo) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($user->profile_photo);
+                Storage::disk('public')->delete($user->profile_photo);
             }
             $data['profile_photo'] = $request->file('profile_photo')->store('profile_photos', 'public');
         }
 
-        // 4. Salva as alterações
         $user->update($data);
 
-        return redirect()->route('perfil.edit')->with('success', 'Perfil atualizado com sucesso!');
+        return redirect()->route('perfil.edit')->with('success', 'Perfil atualizado!');
     }
 }
