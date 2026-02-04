@@ -1,136 +1,189 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card shadow-sm border-0 rounded-3">
-            <div class="card-header bg-primary text-white text-center py-3">
-                <h4 class="mb-0 fw-bold">Editar Meu Perfil</h4>
-            </div>
-            <div class="card-body p-4">
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            {{-- Cartão Principal: Edição de Perfil --}}
+            <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                <div class="d-flex align-items-center mb-4">
+                    <i class="bi bi-person-gear text-primary me-2" style="font-size: 2rem;"></i>
+                    <h3 class="fw-bold mb-0">Editar Perfil</h3>
+                </div>
+
+                @if(session('success'))
+                    <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm" role="alert">
+                        <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                @endif
 
                 <form method="POST" action="{{ route('perfil.update') }}" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
 
-                    {{-- Seção de Foto de Perfil --}}
-                    <h5 class="text-secondary mb-3 border-bottom pb-2">Foto de Perfil</h5>
-                    <div class="mb-4 text-center">
-                        @if($user->profile_photo)
-                            <img src="{{ asset('storage/' . $user->profile_photo) }}" 
-                                 class="rounded-circle mb-3 border shadow-sm" 
-                                 width="120" height="120" style="object-fit: cover;">
-                        @else
-                            <div class="rounded-circle bg-secondary text-white d-inline-flex align-items-center justify-content-center mb-3 shadow-sm" 
-                                 style="width: 120px; height: 120px; font-size: 3rem;">
-                                {{ substr($user->name, 0, 1) }}
-                            </div>
-                        @endif
-                        <input type="file" name="profile_photo" class="form-control w-50 mx-auto @error('profile_photo') is-invalid @enderror">
-                        @error('profile_photo')
-                            <div class="invalid-feedback d-block">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    {{-- Seção de Dados Pessoais --}}
-                    <h5 class="text-secondary mb-3 border-bottom pb-2">Dados Pessoais</h5>
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Nome Completo <span class="text-danger">*</span></label>
-                            <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" 
-                                   required value="{{ old('name', $user->name) }}">
-                            @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label">Email <span class="text-danger">*</span></label>
-                            <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" 
-                                   required value="{{ old('email', $user->email) }}">
-                            @error('email') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label">CPF <span class="text-danger">*</span></label>
-                            <input type="text" name="cpf" class="form-control @error('cpf') is-invalid @enderror" 
-                                   oninput="mascaraCPF(this)" maxlength="14" placeholder="000.000.000-00" 
-                                   value="{{ old('cpf', $user->cpf) }}" required>
-                            @error('cpf') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label">Whatsapp / Contato <span class="text-danger">*</span></label>
-                            <input type="text" name="contato" class="form-control @error('contato') is-invalid @enderror" 
-                                   oninput="mascaraTelefone(this)" maxlength="14" placeholder="(00)000000000" 
-                                   value="{{ old('contato', $user->contato) }}" required>
-                            @error('contato') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-                    </div>
-
-                    {{-- Seção de Redes Sociais --}}
-                    <h5 class="text-secondary mb-3 border-bottom pb-2 mt-4">Redes Sociais <small class="text-muted fw-normal fs-6">(Opcional)</small></h5>
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label"><i class="bi bi-facebook text-primary"></i> Facebook (Link)</label>
-                            <input type="url" name="facebook" class="form-control @error('facebook') is-invalid @enderror" 
-                                   value="{{ old('facebook', $user->facebook) }}" placeholder="https://facebook.com/seu.perfil">
-                            @error('facebook') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label"><i class="bi bi-instagram text-danger"></i> Instagram (Link)</label>
-                            <input type="url" name="instagram" class="form-control @error('instagram') is-invalid @enderror" 
-                                   value="{{ old('instagram', $user->instagram) }}" placeholder="https://instagram.com/seu.perfil">
-                            @error('instagram') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                        </div>
-                    </div>
-
-                    {{-- Seção de Endereço --}}
-                    <h5 class="text-secondary mb-3 border-bottom pb-2 mt-4">Endereço</h5>
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-4">
-                            <label class="form-label">CEP</label>
-                            <input type="text" id="cep" class="form-control" onblur="buscarCep(this.value)" 
-                                   placeholder="00000-000">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">País <span class="text-danger">*</span></label>
-                            <input type="text" name="pais" id="pais" class="form-control @error('pais') is-invalid @enderror" 
-                                   required value="{{ old('pais', $user->pais) }}">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Estado <span class="text-danger">*</span></label>
-                            <input type="text" name="estado" id="estado" class="form-control @error('estado') is-invalid @enderror" 
-                                   required value="{{ old('estado', $user->estado) }}">
-                        </div>
+                    {{-- Foto de Perfil --}}
+                    <div class="row mb-4 align-items-center justify-content-center text-center">
                         <div class="col-md-12">
-                            <label class="form-label">Cidade <span class="text-danger">*</span></label>
-                            <input type="text" name="cidade" id="cidade" class="form-control @error('cidade') is-invalid @enderror" 
-                                   required value="{{ old('cidade', $user->cidade) }}">
+                            <div class="position-relative d-inline-block">
+                                @if($user->profile_photo)
+                                    <img src="{{ asset('storage/' . $user->profile_photo) }}" 
+                                         class="rounded-circle shadow-sm border border-3 border-white" 
+                                         width="120" height="120" style="object-fit: cover;" id="preview-foto">
+                                @else
+                                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center shadow-sm border border-3 border-white" 
+                                         style="width: 120px; height: 120px;" id="preview-placeholder">
+                                        <i class="bi bi-person text-secondary" style="font-size: 3rem;"></i>
+                                    </div>
+                                @endif
+                                
+                                <label for="profile_photo" class="position-absolute bottom-0 end-0 btn btn-primary btn-sm rounded-circle shadow-sm" style="width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                                    <i class="bi bi-camera-fill"></i>
+                                </label>
+                                <input type="file" name="profile_photo" id="profile_photo" class="d-none" accept="image/*" onchange="previewImage(this)">
+                            </div>
+                            <p class="text-muted small mt-2">Clique no ícone da câmera para alterar sua foto.</p>
                         </div>
                     </div>
 
-                    <div class="d-grid mt-4">
-                        <button type="submit" class="btn btn-success btn-lg fw-bold">Salvar Alterações</button>
+                    {{-- Dados Pessoais --}}
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-uppercase text-muted">Nome Completo</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-person text-muted"></i></span>
+                                <input type="text" name="name" class="form-control border-start-0 ps-0 @error('name') is-invalid @enderror" value="{{ old('name', $user->name) }}" required>
+                            </div>
+                            @error('name')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-uppercase text-muted">E-mail</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-envelope text-muted"></i></span>
+                                <input type="email" name="email" class="form-control border-start-0 ps-0 @error('email') is-invalid @enderror" value="{{ old('email', $user->email) }}" required>
+                            </div>
+                            @error('email')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small text-muted fw-bold">CPF *</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-card-heading text-muted"></i></span>
+                                <input type="text" name="cpf" class="form-control border-start-0 ps-0 cpf-mask @error('cpf') is-invalid @enderror" 
+                                       oninput="mascaraCPF(this)" maxlength="14" placeholder="000.000.000-00" value="{{ old('cpf') }}" required>
+                            </div>
+                            @error('cpf')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small text-muted fw-bold">WHATSAPP / CELULAR *</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-whatsapp text-muted"></i></span>
+                                <input type="text" name="contato" class="form-control border-start-0 ps-0 phone-mask @error('contato') is-invalid @enderror" 
+                                       oninput="mascaraTelefone(this)" maxlength="14" placeholder="(00) 00000-0000" value="{{ old('contato') }}" required>
+                            </div>
+                            @error('contato')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                        </div>
+
+                        {{-- Endereço --}}
+                        <div class="col-12 mt-4">
+                            <h6 class="fw-bold border-bottom pb-2 mb-3 text-secondary">Localização</h6>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label small text-muted">País</label>
+                            <select id="pais" name="pais" class="form-select bg-light" required>
+                                <option value="Brasil" {{ old('pais', $user->pais) == 'Brasil' ? 'selected' : '' }}>Brasil</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label small text-muted">Estado</label>
+                            <select id="estado" name="estado" class="form-select bg-light" required data-selected="{{ old('estado', $user->estado) }}">
+                                <option value="">Selecione...</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label small text-muted">Cidade</label>
+                            <select id="cidade" name="cidade" class="form-select bg-light" required data-selected="{{ old('cidade', $user->cidade) }}">
+                                <option value="">Selecione...</option>
+                            </select>
+                        </div>
+
+                        {{-- Redes Sociais --}}
+                        <div class="col-12 mt-4">
+                            <h6 class="fw-bold border-bottom pb-2 mb-3 text-secondary">Redes Sociais (Opcional)</h6>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white text-primary border-end-0"><i class="bi bi-facebook"></i></span>
+                                <input type="url" name="facebook" class="form-control border-start-0 ps-0" placeholder="Link do Facebook" value="{{ old('facebook', $user->facebook) }}">
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white text-danger border-end-0"><i class="bi bi-instagram"></i></span>
+                                <input type="url" name="instagram" class="form-control border-start-0 ps-0" placeholder="Link do Instagram" value="{{ old('instagram', $user->instagram) }}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 mt-5">
+                        <button type="submit" class="btn btn-primary rounded-pill py-2 fw-bold shadow-sm hover-scale">
+                            Salvar Alterações
+                        </button>
                     </div>
                 </form>
+
+                {{-- NOVA SEÇÃO: Segurança da Conta --}}
+                <div class="mt-5 pt-4 border-top">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                        <div>
+                            <h5 class="fw-bold text-dark mb-1">
+                                <i class="bi bi-shield-lock text-success me-2"></i>Segurança da Conta
+                            </h5>
+                            <p class="text-muted small mb-0">Mantenha sua conta segura alterando sua senha periodicamente.</p>
+                        </div>
+                        <a href="{{ route('perfil.password.edit') }}" class="btn btn-outline-secondary rounded-pill px-4">
+                            Alterar Senha
+                        </a>
+                    </div>
+                </div>
 
             </div>
         </div>
     </div>
 </div>
 
-{{-- Scripts --}}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script src="{{ asset('js/masks.js') }}"></script>
-<script src="{{ asset('js/location.js') }}"></script>
-
+{{-- Scripts para Máscaras e Preview de Imagem --}}
 <script>
-    // Executa as máscaras ao carregar a página para os dados que já vêm do banco
-    document.addEventListener('DOMContentLoaded', function() {
-        const cpfInput = document.querySelector('input[name="cpf"]');
-        const telInput = document.querySelector('input[name="contato"]');
-        if(cpfInput) mascaraCPF(cpfInput);
-        if(telInput) mascaraTelefone(telInput);
-    });
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var img = document.getElementById('preview-foto');
+                if(img) {
+                    img.src = e.target.result;
+                } else {
+                    // Se não tiver imagem (estiver mostrando o placeholder), recarrega a página ou manipula o DOM para trocar a div por img.
+                    // Simplificação: apenas exibe se já existir a tag img, caso contrário o usuário verá após salvar.
+                    // Melhoria: substituir a div placeholder pela img dinamicamente.
+                    let placeholder = document.getElementById('preview-placeholder');
+                    if(placeholder) {
+                        placeholder.outerHTML = `<img src="${e.target.result}" class="rounded-circle shadow-sm border border-3 border-white" width="120" height="120" style="object-fit: cover;" id="preview-foto">`;
+                    }
+                }
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
 </script>
+
+{{-- Importando seus scripts de localização e máscaras --}}
+<script src="{{ asset('js/location.js') }}"></script>
+<script src="{{ asset('js/masks.js') }}"></script>
 @endsection

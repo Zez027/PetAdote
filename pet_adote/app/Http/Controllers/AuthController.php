@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Validation\Rules\Password;
 use App\Rules\Cpf;
 
 class AuthController extends Controller
@@ -36,10 +37,15 @@ class AuthController extends Controller
         if (Auth::attempt($request->only('email', 'password'), $request->filled('remember'))) {
             RateLimiter::clear($throttleKey);
             $request->session()->regenerate();
-            return redirect()->intended('/home');
+            return redirect()->intended('home');
         }
 
         RateLimiter::hit($throttleKey);
+
+        return back()->withErrors([
+            'email' => 'E-mail ou senha incorretos.',
+        ])->onlyInput('email');
+
         return back()->withErrors(['email' => 'Credenciais inválidas.'])->onlyInput('email');
     }
 
@@ -142,5 +148,41 @@ class AuthController extends Controller
         $user->update($data);
 
         return redirect()->route('perfil.edit')->with('success', 'Perfil atualizado!');
+    }
+
+    /**
+     * Exibe o formulário de alteração de senha
+     */
+    public function editPassword()
+    {
+        return view('auth.passwords.change');
+    }
+
+    /**
+     * Processa a alteração de senha
+     */
+    public function updatePassword(Request $request)
+    {
+        $user = auth()->user();
+
+        $request->validate([
+            'current_password' => ['required', 'current_password'], // Valida se a senha atual está correta
+            'password' => [
+                'required', 
+                'confirmed', 
+                Password::min(8)->letters()->numbers()->symbols()->mixedCase()
+            ],
+        ], [
+            'current_password' => 'A senha atual está incorreta.',
+            'password.confirmed' => 'A confirmação da nova senha não confere.',
+            'password.min' => 'A nova senha deve ter pelo menos 8 caracteres.',
+        ]);
+
+        // Atualiza a senha no banco (criptografada)
+        $user->update([
+            'password' => Hash::make($request->password)
+        ]);
+
+        return redirect()->route('perfil.edit')->with('success', 'Senha alterada com sucesso!');
     }
 }

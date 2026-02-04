@@ -1,62 +1,76 @@
 document.addEventListener("DOMContentLoaded", function () {
-
-    const estados = {
-        "ES": [
-            'Alegre'
-        ]
-    };
-
     const estadoSelect = document.getElementById("estado");
     const cidadeSelect = document.getElementById("cidade");
 
+    // Se não houver os campos na tela, para a execução
     if (!estadoSelect || !cidadeSelect) return;
 
-    function carregarEstados(estadoSelecionado = "") {
-        estadoSelect.innerHTML = '<option value="">Selecione...</option>';
+    const selectedEstado = estadoSelect.getAttribute("data-selected");
+    const selectedCidade = cidadeSelect.getAttribute("data-selected");
 
-        Object.keys(estados).forEach(sigla => {
-            let option = document.createElement("option");
-            option.value = sigla;
-            option.textContent = sigla;
+    // 1. Busca os estados na API do IBGE
+    fetch("https://servicodados.ibge.gov.br/api/v1/localidades/estados?orderBy=nome")
+        .then(response => response.json())
+        .then(estados => {
+            // Limpa o "Carregando..." e põe "Selecione..."
+            estadoSelect.innerHTML = '<option value="">Selecione...</option>';
 
-            if (sigla === estadoSelecionado) {
-                option.selected = true;
+            estados.forEach(estado => {
+                const option = document.createElement("option");
+                option.value = estado.sigla; // Ex: SP
+                option.textContent = estado.nome; // Ex: São Paulo
+                
+                // Mantém selecionado se for edição ou erro de validação
+                if (selectedEstado && selectedEstado === estado.sigla) {
+                    option.selected = true;
+                }
+                estadoSelect.appendChild(option);
+            });
+
+            // Se já tiver estado selecionado (edição/erro), carrega as cidades dele
+            if (selectedEstado) {
+                carregarCidades(selectedEstado, selectedCidade);
             }
+        })
+        .catch(error => console.error("Erro ao carregar estados:", error));
 
-            estadoSelect.appendChild(option);
-        });
-    }
-
-    function carregarCidades(estado, cidadeSelecionada = "") {
-        cidadeSelect.innerHTML = '<option value="">Selecione...</option>';
-
-        if (!estado || !estados[estado]) return;
-
-        estados[estado].forEach(cidade => {
-            let option = document.createElement("option");
-            option.value = cidade;
-            option.textContent = cidade;
-
-            if (cidade === cidadeSelecionada) {
-                option.selected = true;
-            }
-
-            cidadeSelect.appendChild(option);
-        });
-    }
-
-    // Quando trocar o estado
+    // 2. Quando o usuário troca o estado
     estadoSelect.addEventListener("change", function () {
-        carregarCidades(this.value, "");
+        const uf = this.value;
+        if (uf) {
+            carregarCidades(uf, null);
+        } else {
+            cidadeSelect.innerHTML = '<option value="">Selecione o estado...</option>';
+            cidadeSelect.disabled = true;
+        }
     });
 
-    // Carregar valores antigos vindos do Blade (old() ou valores do PET)
-    const estadoAntigo = estadoSelect.getAttribute("data-value") || "";
-    const cidadeAntiga = cidadeSelect.getAttribute("data-value") || "";
+    // 3. Função que busca as cidades
+    function carregarCidades(uf, cidadePreSelecionada) {
+        cidadeSelect.innerHTML = '<option value="">Carregando...</option>';
+        cidadeSelect.disabled = true;
 
-    carregarEstados(estadoAntigo);
+        fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${uf}/municipios?orderBy=nome`)
+            .then(response => response.json())
+            .then(cidades => {
+                cidadeSelect.innerHTML = '<option value="">Selecione...</option>';
+                
+                cidades.forEach(cidade => {
+                    const option = document.createElement("option");
+                    option.value = cidade.nome; 
+                    option.textContent = cidade.nome;
 
-    if (estadoAntigo !== "") {
-        carregarCidades(estadoAntigo, cidadeAntiga);
+                    if (cidadePreSelecionada && cidadePreSelecionada === cidade.nome) {
+                        option.selected = true;
+                    }
+                    cidadeSelect.appendChild(option);
+                });
+
+                cidadeSelect.disabled = false;
+            })
+            .catch(error => {
+                console.error("Erro ao carregar cidades:", error);
+                cidadeSelect.innerHTML = '<option value="">Erro ao carregar</option>';
+            });
     }
 });
