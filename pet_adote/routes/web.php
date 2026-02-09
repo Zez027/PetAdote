@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PetController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\AdoptionController;
@@ -62,6 +63,8 @@ Route::middleware('auth')->group(function () {
         $request->user()->sendEmailVerificationNotification();
         return back()->with('message', 'Link de verificação reenviado!');
     })->middleware(['throttle:6,1'])->name('verification.send');
+
+    Route::get('/home', [HomeController::class, 'index'])->name('home')->middleware('auth');
 
     // Logout e Perfil Básico (Acessível sem verificação para permitir que o user saia ou corrija dados)
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
