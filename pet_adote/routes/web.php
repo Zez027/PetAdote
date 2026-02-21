@@ -16,7 +16,10 @@ use Illuminate\Http\Request;
 |--------------------------------------------------------------------------
 */
 Route::get('/', [PetController::class, 'index'])->name('home');
-Route::get('/pets/{pet}', [PetController::class, 'show'])->name('pets.show');
+
+Route::get('/pets/{pet}', [PetController::class, 'show'])
+    ->name('pets.show')
+    ->where('pet', '[0-9]+');
 
 /*
 |--------------------------------------------------------------------------
