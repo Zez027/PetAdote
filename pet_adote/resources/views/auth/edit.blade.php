@@ -71,7 +71,7 @@
                             <div class="input-group">
                                 <span class="input-group-text bg-light border-end-0"><i class="bi bi-card-heading text-muted"></i></span>
                                 <input type="text" name="cpf" class="form-control border-start-0 ps-0 cpf-mask @error('cpf') is-invalid @enderror" 
-                                       oninput="mascaraCPF(this)" maxlength="14" placeholder="000.000.000-00" value="{{ old('cpf') }}" required>
+                                       oninput="mascaraCPF(this)" maxlength="14" placeholder="000.000.000-00" value="{{ old('cpf', auth()->user()->cpf) }}" required>
                             </div>
                             @error('cpf')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                         </div>
@@ -81,7 +81,7 @@
                             <div class="input-group">
                                 <span class="input-group-text bg-light border-end-0"><i class="bi bi-whatsapp text-muted"></i></span>
                                 <input type="text" name="contato" class="form-control border-start-0 ps-0 phone-mask @error('contato') is-invalid @enderror" 
-                                       oninput="mascaraTelefone(this)" maxlength="14" placeholder="(00) 00000-0000" value="{{ old('contato') }}" required>
+                                       oninput="mascaraTelefone(this)" maxlength="14" placeholder="(00) 00000-0000" value="{{ old('contato', auth()->user()->contato) }}" required>
                             </div>
                             @error('contato')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                         </div>

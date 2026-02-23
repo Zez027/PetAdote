@@ -69,16 +69,16 @@
                             <label class="form-label fw-bold small text-muted">ESPÉCIE</label>
                             <div class="input-group input-group-lg bg-light rounded-3">
                                 <span class="input-group-text bg-transparent border-0"><i class="bi bi-bug text-secondary"></i></span>
-                                <select name="especie" class="form-select bg-transparent border-0 ps-0" id="especie" required onchange="atualizarRacasLocal()">
+                                <select name="tipo" class="form-select bg-transparent border-0 ps-0" id="especie" required data-selected="{{ old('tipo', $pet->tipo) }}" onchange="atualizarRacasLocal()">
                                     <option value="">Selecione...</option>
-                                    <option value="Cachorro" {{ old('especie', $pet->especie) == 'Cachorro' ? 'selected' : '' }}>Cachorro</option>
-                                    <option value="Gato" {{ old('especie', $pet->especie) == 'Gato' ? 'selected' : '' }}>Gato</option>
-                                    <option value="Pássaro" {{ old('especie', $pet->especie) == 'Pássaro' ? 'selected' : '' }}>Pássaro</option>
-                                    <option value="Coelho" {{ old('especie', $pet->especie) == 'Coelho' ? 'selected' : '' }}>Coelho</option>
-                                    <option value="Roedor" {{ old('especie', $pet->especie) == 'Roedor' ? 'selected' : '' }}>Roedor</option>
-                                    <option value="Réptil" {{ old('especie', $pet->especie) == 'Réptil' ? 'selected' : '' }}>Réptil</option>
-                                    <option value="Equino" {{ old('especie', $pet->especie) == 'Equino' ? 'selected' : '' }}>Equino</option>
-                                    <option value="Outros" {{ old('especie', $pet->especie) == 'Outros' ? 'selected' : '' }}>Outros</option>
+                                    <option value="Cachorro">Cachorro</option>
+                                    <option value="Gato">Gato</option>
+                                    <option value="Pássaro">Pássaro</option>
+                                    <option value="Coelho">Coelho</option>
+                                    <option value="Roedor">Roedor</option>
+                                    <option value="Réptil">Réptil</option>
+                                    <option value="Equino">Equino</option>
+                                    <option value="Outros">Outros</option>
                                 </select>
                             </div>
                         </div>
@@ -97,7 +97,7 @@
                             <label class="form-label fw-bold small text-muted">PORTE</label>
                             <div class="input-group input-group-lg bg-light rounded-3">
                                 <span class="input-group-text bg-transparent border-0"><i class="bi bi-arrows-angle-expand text-secondary"></i></span>
-                                <select name="porte" class="form-select bg-transparent border-0 ps-0" required>
+                                <select name="porte" class="form-select bg-transparent border-0 ps-0" id="porte" required data-selected="{{ old('porte', $pet->porte) }}">
                                     <option value="">Selecione...</option>
                                     <option value="Pequeno" {{ old('porte', $pet->porte) == 'Pequeno' ? 'selected' : '' }}>Pequeno</option>
                                     <option value="Médio" {{ old('porte', $pet->porte) == 'Médio' ? 'selected' : '' }}>Médio</option>
@@ -168,9 +168,9 @@
                             <div class="input-group input-group-lg bg-light rounded-3">
                                 <span class="input-group-text bg-transparent border-0"><i class="bi bi-clipboard-check text-secondary"></i></span>
                                 <select name="status" class="form-select bg-transparent border-0 ps-0" required>
-                                    <option value="Disponível" {{ old('status', $pet->status) == 'Disponível' ? 'selected' : '' }}>Disponível para Adoção</option>
-                                    <option value="Em Processo" {{ old('status', $pet->status) == 'Em Processo' ? 'selected' : '' }}>Em Processo de Adoção</option>
-                                    <option value="Adotado" {{ old('status', $pet->status) == 'Adotado' ? 'selected' : '' }}>Já Adotado</option>
+                                    <option value="disponivel" {{ old('status', $pet->status) == 'disponivel' ? 'selected' : '' }}>Disponível para Adoção</option>
+                                    <option value="indisponivel" {{ old('status', $pet->status) == 'indisponivel' ? 'selected' : '' }}>Em Processo de Adoção</option>
+                                    <option value="adotado" {{ old('status', $pet->status) == 'adotado' ? 'selected' : '' }}>Já Adotado</option>
                                 </select>
                             </div>
                         </div>
@@ -259,45 +259,72 @@
     <script src="{{ asset('js/location.js') }}"></script>
 
     <script>
-        const racasDict = {
-            'Cachorro': ['SRD (Vira-lata)', 'Akita', 'Beagle', 'Boxer', 'Bulldog', 'Chihuahua', 'Dachshund', 'Golden Retriever', 'Husky', 'Labrador', 'Lulu da Pomerânia', 'Maltês', 'Pastor Alemão', 'Pinscher', 'Pitbull', 'Poodle', 'Pug', 'Rottweiler', 'Shih Tzu', 'Yorkshire', 'Outra'],
-            'Gato': ['SRD (Sem Raça Definida)', 'Angorá', 'Bengal', 'Maine Coon', 'Persa', 'Ragdoll', 'Siamês', 'Sphynx', 'Outra'],
-            'Pássaro': ['SRD', 'Calopsita', 'Canário', 'Papagaio', 'Periquito', 'Outra'],
-            'Coelho': ['SRD', 'Angorá', 'Lionhead', 'Mini Lop', 'Outra'],
-            'Roedor': ['Hamster', 'Porquinho-da-índia', 'Twister', 'Outro'],
-            'Réptil': ['Cobra', 'Iguana', 'Jabuti', 'Tartaruga', 'Outro'],
-            'Equino': ['SRD', 'Crioulo', 'Mangalarga', 'Quarto de Milha', 'Outra'],
-            'Outros': ['Outra']
-        };
+    const racasDict = {
+        'Cachorro': ['SRD (Vira-lata)', 'Akita', 'Beagle', 'Boxer', 'Bulldog', 'Chihuahua', 'Dachshund', 'Golden Retriever', 'Husky', 'Labrador', 'Lulu da Pomerânia', 'Maltês', 'Pastor Alemão', 'Pinscher', 'Pitbull', 'Poodle', 'Pug', 'Rottweiler', 'Shih Tzu', 'Yorkshire', 'Outra'],
+        'Gato': ['SRD (Sem Raça Definida)', 'Angorá', 'Bengal', 'Maine Coon', 'Persa', 'Ragdoll', 'Siamês', 'Sphynx', 'Outra'],
+        'Pássaro': ['SRD', 'Calopsita', 'Canário', 'Papagaio', 'Periquito', 'Outra'],
+        'Coelho': ['SRD', 'Angorá', 'Lionhead', 'Mini Lop', 'Outra'],
+        'Roedor': ['Hamster', 'Porquinho-da-índia', 'Twister', 'Outro'],
+        'Réptil': ['Cobra', 'Iguana', 'Jabuti', 'Tartaruga', 'Outro'],
+        'Equino': ['SRD', 'Crioulo', 'Mangalarga', 'Quarto de Milha', 'Outra'],
+        'Outros': ['Outra']
+    };
 
-        function atualizarRacasLocal(racaPreSelecionada = '') {
-            const especie = document.getElementById('especie').value;
-            const racaSelect = document.getElementById('raca');
-            
-            if(!racaSelect) return;
+    function atualizarRacasLocal(racaPreSelecionada = '') {
+        const especieElement = document.getElementById('especie');
+        const racaSelect = document.getElementById('raca');
+        
+        if(!racaSelect || !especieElement) return;
 
-            racaSelect.innerHTML = '<option value="">Selecione a raça...</option>';
-            
-            if (racasDict[especie]) {
-                racasDict[especie].forEach(raca => {
-                    const option = document.createElement('option');
-                    option.value = raca;
-                    option.textContent = raca;
-                    if (raca === racaPreSelecionada) option.selected = true;
-                    racaSelect.appendChild(option);
-                });
-            }
+        const especie = especieElement.value;
+        racaSelect.innerHTML = '<option value="">Selecione a raça...</option>';
+        
+        if (racasDict[especie]) {
+            racasDict[especie].forEach(raca => {
+                const option = document.createElement('option');
+                option.value = raca;
+                option.textContent = raca;
+                
+                // Compara ignorando espaços e letras minúsculas/maiúsculas
+                if (raca.trim().toLowerCase() === (racaPreSelecionada || '').trim().toLowerCase()) {
+                    option.selected = true;
+                }
+                
+                racaSelect.appendChild(option);
+            });
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const especieElement = document.getElementById('especie');
+        const porteElement = document.getElementById('porte');
+        const racaElement = document.getElementById('raca');
+        
+        // 1. Força a seleção correta da Espécie usando data-selected
+        const especieSalva = especieElement ? especieElement.getAttribute('data-selected') : "";
+        if (especieSalva && especieElement) {
+            Array.from(especieElement.options).forEach(opt => {
+                if (opt.value.trim().toLowerCase() === especieSalva.trim().toLowerCase()) {
+                    opt.selected = true;
+                }
+            });
         }
 
-        document.addEventListener("DOMContentLoaded", function() {
-            // Inicializa a raça lendo o valor gravado do banco de dados na view
-            const especieElement = document.getElementById('especie');
-            const racaElement = document.getElementById('raca');
-            
-            if(especieElement && especieElement.value) {
-                atualizarRacasLocal(racaElement.getAttribute('data-selected'));
-            }
-        });
-    </script>
+        // 2. Força a seleção correta do Porte
+        const porteSalvo = porteElement ? porteElement.getAttribute('data-selected') : "";
+        if (porteSalvo && porteElement) {
+            Array.from(porteElement.options).forEach(opt => {
+                if (opt.value.trim().toLowerCase() === porteSalvo.trim().toLowerCase()) {
+                    opt.selected = true;
+                }
+            });
+        }
+
+        // 3. Com a Espécie já selecionada, manda gerar as raças e selecionar a Raça
+        if (especieElement && especieElement.value) {
+            atualizarRacasLocal(racaElement.getAttribute('data-selected'));
+        }
+    });
+</script>
 </div>
 @endsection
