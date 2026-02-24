@@ -178,17 +178,20 @@ class PetController extends Controller
         ]);
         
         $pet->update([
-            'nome'      => $request->nome,
-            'idade'     => $request->idade,
-            'genero'    => $request->genero,
-            'porte'     => $request->porte,
-            'tipo'      => $request->tipo,
-            'raca'      => $request->raca,
-            'descricao' => $request->descricao,
-            'status'    => $request->status,
-            'pais'      => $request->pais,
-            'estado'    => $request->estado,
-            'cidade'    => $request->cidade,
+            'nome'        => $request->nome,
+            'idade'       => $request->idade,
+            'genero'      => $request->genero,
+            'porte'       => $request->porte,
+            'tipo'        => $request->tipo,
+            'raca'        => $request->raca,
+            'descricao'   => $request->descricao,
+            'status'      => $request->status,
+            'pais'        => $request->pais,
+            'estado'      => $request->estado,
+            'cidade'      => $request->cidade,
+            'vacinado'    => $request->has('vacinado'),
+            'castrado'    => $request->has('castrado'),
+            'vermifugado' => $request->has('vermifugado'),
         ]);
 
         // Atualiza foto principal

@@ -191,7 +191,7 @@
                         <div class="col-12">
                             <div class="bg-light rounded-3 p-3 border-dashed text-center" style="border: 2px dashed #dee2e6;">
                                 <label class="form-label fw-bold small text-muted d-block mb-3">SELECIONE FOTOS PARA ADICIONAR (OPCIONAL)</label>
-                                <input type="file" name="fotos[]" class="form-control form-control-lg bg-white" multiple accept="image/*">
+                                <input type="file" name="photos[]" class="form-control form-control-lg bg-white" multiple accept="image/*">
                             </div>
                         </div>
                     </div>
@@ -217,7 +217,7 @@
                     @foreach($pet->photos as $photo)
                         <div class="col-6 col-md-4 col-lg-3">
                             <div class="card border-0 shadow-sm rounded-3 overflow-hidden position-relative">
-                                <img src="{{ asset('storage/' . $photo->photo_path) }}" class="card-img-top object-fit-cover" style="height: 150px;" alt="Foto do Pet">
+                                <img src="{{ asset('storage/' . $photo->foto) }}" class="card-img-top object-fit-cover" style="height: 150px;" alt="Foto do Pet">
                                 
                                 @if($photo->is_main)
                                     <div class="position-absolute top-0 start-0 m-2">

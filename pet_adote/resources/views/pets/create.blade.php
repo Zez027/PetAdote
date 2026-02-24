@@ -61,7 +61,7 @@
                             <label class="form-label fw-bold small text-muted">ESPÉCIE</label>
                             <div class="input-group input-group-lg bg-light rounded-3">
                                 <span class="input-group-text bg-transparent border-0"><i class="bi bi-bug text-secondary"></i></span>
-                                <select name="especie" class="form-select bg-transparent border-0 ps-0" id="especie" required onchange="atualizarRacasLocal()">
+                                <select name="tipo" class="form-select bg-transparent border-0 ps-0" id="especie" required onchange="atualizarRacasLocal()">
                                     <option value="">Selecione...</option>
                                     <option value="Cachorro" {{ old('especie') == 'Cachorro' ? 'selected' : '' }}>Cachorro</option>
                                     <option value="Gato" {{ old('especie') == 'Gato' ? 'selected' : '' }}>Gato</option>
@@ -183,7 +183,7 @@
                         <div class="col-12">
                             <div class="bg-light rounded-3 p-3 border-dashed text-center" style="border: 2px dashed #dee2e6;">
                                 <label class="form-label fw-bold small text-muted d-block mb-3">SELECIONE ATÉ 4 FOTOS</label>
-                                <input type="file" name="fotos[]" class="form-control form-control-lg bg-white" multiple accept="image/*" required>
+                                <input type="file" name="photos[]" class="form-control form-control-lg bg-white" multiple accept="image/*" required>
                                 <small class="text-muted d-block mt-2">A primeira imagem selecionada será a foto principal.</small>
                             </div>
                         </div>
