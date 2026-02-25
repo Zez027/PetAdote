@@ -166,14 +166,12 @@ class AuthController extends Controller
         $user = auth()->user();
 
         $request->validate([
-            'current_password' => ['required', 'current_password'], // Valida se a senha atual está correta
             'password' => [
                 'required', 
                 'confirmed', 
                 Password::min(8)->letters()->numbers()->symbols()->mixedCase()
             ],
         ], [
-            'current_password' => 'A senha atual está incorreta.',
             'password.confirmed' => 'A confirmação da nova senha não confere.',
             'password.min' => 'A nova senha deve ter pelo menos 8 caracteres.',
         ]);

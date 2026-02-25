@@ -17,21 +17,6 @@
                     @csrf
                     @method('PUT')
 
-                    {{-- Senha Atual --}}
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small text-muted">Senha Atual</label>
-                        <div class="input-group">
-                            <input type="password" name="current_password" id="current_password" 
-                                   class="form-control border-end-0 @error('current_password') is-invalid @enderror" required>
-                            <button class="btn btn-outline-secondary border-start-0 bg-white" type="button" onclick="togglePassword('current_password', this)">
-                                <i class="bi bi-eye"></i>
-                            </button>
-                            @error('current_password')
-                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
-
                     {{-- Nova Senha --}}
                     <div class="mb-3">
                         <label class="form-label fw-bold small text-muted">Nova Senha</label>
