@@ -101,6 +101,27 @@
 
             {{-- CARD DO DOADOR E SOLICITAÇÃO --}}
             <div class="card border-0 bg-light rounded-4 p-4">
+                
+                {{-- Exibição de Alertas de Erro (Caso falte algo) --}}
+                @if ($errors->any())
+                    <div class="alert alert-danger border-0 rounded-4 shadow-sm mb-4">
+                        <strong class="d-block mb-1"><i class="bi bi-exclamation-triangle-fill me-1"></i> Ops! Verifique os erros:</strong>
+                        <ul class="mb-0 small">
+                            @foreach ($errors->all() as $err)
+                                <li>{{ $err }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                {{-- Exibição de Sucesso --}}
+                @if(session('success'))
+                    <div class="alert alert-success border-0 rounded-4 shadow-sm mb-4 text-center">
+                        <i class="bi bi-check-circle-fill fs-4 d-block mb-2"></i>
+                        {{ session('success') }}
+                    </div>
+                @endif
+
                 <div class="d-flex align-items-center mb-4">
                     @if($pet->user->profile_photo)
                         <img src="{{ asset('storage/' . $pet->user->profile_photo) }}" class="rounded-circle border border-2 border-white shadow-sm me-3" width="60" height="60" style="object-fit: cover;">
@@ -125,8 +146,19 @@
                     @if(!$pedidoExistente)
                         <form action="{{ route('adocoes.store', $pet->id) }}" method="POST">
                             @csrf
+
+                            <input type="hidden" name="pet_id" value="{{ $pet->id }}">
+
+                            <input type="hidden" name="pet" value="{{ $pet->id }}">
+                            
+                            {{-- Campo de mensagem que o StoreAdoptionRequest exige --}}
+                            <div class="mb-3">
+                                <label class="form-label fw-bold small text-muted">MENSAGEM AO DOADOR</label>
+                                <textarea name="mensagem" class="form-control border-0 shadow-sm rounded-3 p-3" rows="3" placeholder="Olá! Tenho muito interesse em adotar e posso oferecer um ótimo lar..." required></textarea>
+                            </div>
+
                             <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill fw-bold shadow mb-3">
-                                <i class="bi bi-chat-heart me-2"></i> Tenho Interesse na Adoção
+                                <i class="bi bi-chat-heart me-2"></i> Enviar Pedido de Adoção
                             </button>
                         </form>
                     @else
@@ -142,7 +174,7 @@
                     @endif
                     
                     {{-- Redes Sociais --}}
-                    <div class="d-flex justify-content-center gap-3">
+                    <div class="d-flex justify-content-center gap-3 mt-2">
                         @if($pet->user->instagram)
                             <a href="{{ $pet->user->instagram }}" target="_blank" class="text-danger fs-5"><i class="bi bi-instagram"></i></a>
                         @endif
