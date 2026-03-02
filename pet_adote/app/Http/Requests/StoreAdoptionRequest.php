@@ -21,6 +21,7 @@ class StoreAdoptionRequest extends FormRequest
     {
         return [
             'pet_id' => 'required|exists:pets,id',
+            'mensagem' => ['nullable', 'string', 'max:1000'],
         ];
     }
 

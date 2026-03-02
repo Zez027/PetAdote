@@ -58,6 +58,12 @@
                             <h5 class="fw-bold text-dark mb-1">{{ $pedido->pet->name }}</h5>
                             <p class="text-muted small mb-3">
                                 <i class="bi bi-geo-alt me-1"></i> {{ $pedido->pet->city ?? $pedido->pet->cidade }} - {{ $pedido->pet->state ?? $pedido->pet->estado }}
+                                 @if($pedido->status == 'rejeitado' && $pedido->motivo_rejeicao)
+                                        <div class="alert alert-danger mt-3 mb-0 border-0 rounded-4 shadow-sm">
+                                            <strong class="d-block mb-1"><i class="bi bi-info-circle-fill me-1"></i> Motivo da recusa informado pelo doador:</strong>
+                                            <span class="text-dark" style="font-style: italic;">"{{ $pedido->motivo_rejeicao }}"</span>
+                                        </div>
+                                    @endif
                             </p>
 
                             <div class="d-flex align-items-center mb-4 p-2 bg-light rounded-3">

@@ -72,22 +72,36 @@
                                     </div>
                                 </div>
 
-                                {{-- Caixa da Mensagem --}}
-                                <div class="bg-light rounded-3 p-3 mb-4 border">
-                                    <strong class="d-block small text-muted mb-1"><i class="bi bi-chat-left-quote me-1"></i> MENSAGEM DO SOLICITANTE:</strong>
-                                    <p class="mb-0 text-dark" style="font-style: italic;">"{{ $pedido->mensagem }}"</p>
-                                </div>
-
                                 {{-- Botões de Ação (Apenas se o pedido ainda for "pendente") --}}
                                 @if($pedido->status == 'pendente')
                                     <div class="d-flex gap-3 justify-content-end border-top pt-3">
                                         {{-- Botão Rejeitar --}}
-                                        <form action="{{ route('adoptions.reject', $pedido->id) }}" method="POST" onsubmit="return confirm('Tem certeza que deseja REJEITAR esta solicitação?');">
-                                            @csrf
-                                            <button type="submit" class="btn btn-outline-danger btn-lg rounded-pill px-4 fw-bold shadow-sm">
-                                                <i class="bi bi-x-lg me-1"></i> Rejeitar Adoção
-                                            </button>
-                                        </form>
+                                       <button type="button" class="btn btn-outline-danger btn-lg rounded-pill px-4 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#rejectModal{{ $pedido->id }}">
+                                            <i class="bi bi-x-lg me-1"></i> Rejeitar Adoção
+                                        </button>
+
+                                        {{-- Modal de Rejeição --}}
+                                        <div class="modal fade" id="rejectModal{{ $pedido->id }}" tabindex="-1" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered">
+                                                <div class="modal-content border-0 shadow rounded-4">
+                                                    <div class="modal-header border-bottom-0 pb-0">
+                                                        <h5 class="modal-title fw-bold text-danger"><i class="bi bi-x-circle-fill me-2"></i> Motivo da Rejeição</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <form action="{{ route('adoptions.reject', $pedido->id) }}" method="POST">
+                                                        @csrf
+                                                        <div class="modal-body text-start">
+                                                            <p class="text-muted small mb-3">Informe ao interessado (<strong>{{ $pedido->user->name }}</strong>) o motivo de não prosseguir com a adoção neste momento.</p>
+                                                            <textarea name="motivo_rejeicao" class="form-control rounded-3 bg-light border-0 p-3" rows="4" placeholder="Ex: O pet já foi adotado por outra pessoa, ou o perfil não se adequa às necessidades do animal..." required></textarea>
+                                                        </div>
+                                                        <div class="modal-footer border-top-0 pt-0">
+                                                            <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                                                            <button type="submit" class="btn btn-danger rounded-pill px-4 fw-bold shadow-sm">Confirmar Rejeição</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
 
                                         {{-- Botão Aprovar --}}
                                         <form action="{{ route('adoptions.approve', $pedido->id) }}" method="POST" onsubmit="return confirm('Tem certeza que deseja APROVAR esta solicitação? O pet será marcado como adotado e outros pedidos ficarão indisponíveis.');">

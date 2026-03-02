@@ -94,12 +94,27 @@ class AdoptionController extends Controller
     /**
      * Rejeita uma solicitação de adoção.
      */
-    public function reject(AdoptionRequest $adoptionRequest)
+    public function reject(Request $request, $id)
     {
-        $this->authorize('update', $adoptionRequest);
+        // Valida se a pessoa digitou um motivo
+        $request->validate([
+            'motivo_rejeicao' => 'required|string|max:1000',
+        ], [
+            'motivo_rejeicao.required' => 'Por favor, informe um motivo para a rejeição.'
+        ]);
 
-        $adoptionRequest->update(['status' => 'rejeitado']);
+        $adoptionRequest = AdoptionRequest::findOrFail($id);
 
-        return redirect()->back()->with('success', 'Solicitação rejeitada.');
+        // Bloqueio de segurança: só o dono do pet pode rejeitar
+        if ($adoptionRequest->pet->user_id !== auth()->id()) {
+            abort(403, 'Acesso negado.');
+        }
+
+        $adoptionRequest->update([
+            'status' => 'rejeitado',
+            'motivo_rejeicao' => $request->motivo_rejeicao
+        ]);
+
+        return back()->with('success', 'Solicitação rejeitada. A mensagem foi enviada ao adotante!');
     }
 }

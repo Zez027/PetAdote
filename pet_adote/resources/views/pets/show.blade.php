@@ -150,12 +150,6 @@
                             <input type="hidden" name="pet_id" value="{{ $pet->id }}">
 
                             <input type="hidden" name="pet" value="{{ $pet->id }}">
-                            
-                            {{-- Campo de mensagem que o StoreAdoptionRequest exige --}}
-                            <div class="mb-3">
-                                <label class="form-label fw-bold small text-muted">MENSAGEM AO DOADOR</label>
-                                <textarea name="mensagem" class="form-control border-0 shadow-sm rounded-3 p-3" rows="3" placeholder="Olá! Tenho muito interesse em adotar e posso oferecer um ótimo lar..." required></textarea>
-                            </div>
 
                             <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill fw-bold shadow mb-3">
                                 <i class="bi bi-chat-heart me-2"></i> Enviar Pedido de Adoção
