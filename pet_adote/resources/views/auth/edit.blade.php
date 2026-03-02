@@ -132,6 +132,55 @@
                         </div>
                     </div>
 
+                    {{-- DIVISÓRIA DA FICHA DE ADOTANTE --}}
+                        <hr class="my-5 border-secondary border-opacity-25">
+                        
+                        <div class="mb-4">
+                            <h4 class="fw-bold text-primary mb-1"><i class="bi bi-file-earmark-person-fill me-2"></i> Minha Ficha de Adotante</h4>
+                            <p class="text-muted small">Preencha com sinceridade. Essas informações ajudarão os doadores a avaliarem sua solicitação de adoção.</p>
+                        </div>
+
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-muted small">TIPO DE MORADIA</label>
+                                <select name="tipo_residencia" class="form-select form-select-lg bg-light border-0 shadow-sm">
+                                    <option value="">Selecione...</option>
+                                    <option value="Casa" {{ auth()->user()->tipo_residencia == 'Casa' ? 'selected' : '' }}>Casa</option>
+                                    <option value="Apartamento" {{ auth()->user()->tipo_residencia == 'Apartamento' ? 'selected' : '' }}>Apartamento</option>
+                                    <option value="Sítio/Chácara" {{ auth()->user()->tipo_residencia == 'Sítio/Chácara' ? 'selected' : '' }}>Sítio/Chácara</option>
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-muted small">SEGURANÇA (TELAS/MUROS)</label>
+                                <select name="seguranca" class="form-select form-select-lg bg-light border-0 shadow-sm">
+                                    <option value="">Selecione...</option>
+                                    <option value="Totalmente telado/murado" {{ auth()->user()->seguranca == 'Totalmente telado/murado' ? 'selected' : '' }}>Totalmente telado/murado</option>
+                                    <option value="Parcialmente seguro" {{ auth()->user()->seguranca == 'Parcialmente seguro' ? 'selected' : '' }}>Parcialmente seguro</option>
+                                    <option value="Risco de fuga" {{ auth()->user()->seguranca == 'Risco de fuga' ? 'selected' : '' }}>Acesso à rua / Risco de fuga</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-muted small">TEM OUTROS ANIMAIS EM CASA?</label>
+                                <input type="text" name="outros_pets" class="form-control form-control-lg bg-light border-0 shadow-sm" value="{{ auth()->user()->outros_pets }}" placeholder="Ex: Sim, dois gatos e um cão" maxlength="255">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-muted small">CRIANÇAS EM CASA?</label>
+                                <select name="criancas" class="form-select form-select-lg bg-light border-0 shadow-sm">
+                                    <option value="">Selecione...</option>
+                                    <option value="Sim" {{ auth()->user()->criancas == 'Sim' ? 'selected' : '' }}>Sim</option>
+                                    <option value="Não" {{ auth()->user()->criancas == 'Não' ? 'selected' : '' }}>Não</option>
+                                </select>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label fw-bold text-muted small">TEMPO QUE O PET FICARÁ SOZINHO POR DIA</label>
+                                <input type="text" name="tempo_sozinho" class="form-control form-control-lg bg-light border-0 shadow-sm" value="{{ auth()->user()->tempo_sozinho }}" placeholder="Ex: Fica sozinho umas 8 horas (Trabalho fora)" maxlength="255">
+                            </div>
+                        </div>
+
                     <div class="d-grid gap-2 mt-5">
                         <button type="submit" class="btn btn-primary rounded-pill py-2 fw-bold shadow-sm hover-scale">
                             Salvar Alterações

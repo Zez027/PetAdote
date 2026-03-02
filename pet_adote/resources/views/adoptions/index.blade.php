@@ -72,6 +72,52 @@
                                     </div>
                                 </div>
 
+                                {{-- Botão Analisar Ficha --}}
+                                        <a href="#" class="btn btn-sm btn-outline-primary ms-3 rounded-pill fw-bold" data-bs-toggle="modal" data-bs-target="#perfilModal{{ $pedido->user->id }}">
+                                            <i class="bi bi-clipboard-check-fill me-1"></i> Analisar Ficha do Candidato
+                                        </a>
+
+                                {{-- Modal da Ficha do Adotante --}}
+                                <div class="modal fade" id="perfilModal{{ $pedido->user->id }}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content border-0 shadow-lg rounded-4">
+                                            <div class="modal-header border-bottom-0 pb-0 bg-primary bg-opacity-10 rounded-top-4 p-4">
+                                                <h5 class="modal-title fw-bold text-primary"><i class="bi bi-person-vcard me-2"></i> Ficha de Avaliação</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body p-4 text-start">
+                                                <h5 class="fw-bold text-dark mb-4 border-bottom pb-3"><i class="bi bi-person-circle text-muted me-2"></i> {{ $pedido->user->name }}</h5>
+                                                
+                                                <ul class="list-group list-group-flush">
+                                                    <li class="list-group-item px-0 border-0 mb-3 bg-transparent">
+                                                        <small class="text-muted fw-bold d-block mb-1"><i class="bi bi-house-door-fill me-2 text-secondary"></i>TIPO DE MORADIA</small>
+                                                        <span class="fs-6 text-dark fw-medium">{{ $pedido->user->tipo_residencia ?? 'Não informado' }}</span>
+                                                    </li>
+                                                    <li class="list-group-item px-0 border-0 mb-3 bg-transparent">
+                                                        <small class="text-muted fw-bold d-block mb-1"><i class="bi bi-shield-shaded me-2 text-secondary"></i>SEGURANÇA (TELAS/MUROS)</small>
+                                                        <span class="fs-6 text-dark fw-medium">{{ $pedido->user->seguranca ?? 'Não informado' }}</span>
+                                                    </li>
+                                                    <li class="list-group-item px-0 border-0 mb-3 bg-transparent">
+                                                        <small class="text-muted fw-bold d-block mb-1"><i class="bi bi-info-square-fill me-2 text-secondary"></i>OUTROS ANIMAIS NA CASA?</small>
+                                                        <span class="fs-6 text-dark fw-medium">{{ $pedido->user->outros_pets ?? 'Não informado' }}</span>
+                                                    </li>
+                                                    <li class="list-group-item px-0 border-0 mb-3 bg-transparent">
+                                                        <small class="text-muted fw-bold d-block mb-1"><i class="bi bi-people-fill me-2 text-secondary"></i>CRIANÇAS EM CASA?</small>
+                                                        <span class="fs-6 text-dark fw-medium">{{ $pedido->user->criancas ?? 'Não informado' }}</span>
+                                                    </li>
+                                                    <li class="list-group-item px-0 border-0 bg-transparent border-top pt-3">
+                                                        <small class="text-muted fw-bold d-block mb-1"><i class="bi bi-clock-fill me-2 text-secondary"></i>TEMPO SOZINHO POR DIA</small>
+                                                        <span class="fs-6 text-dark fw-medium">{{ $pedido->user->tempo_sozinho ?? 'Não informado' }}</span>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                            <div class="modal-footer border-top-0 pt-0 p-4">
+                                                <button type="button" class="btn btn-secondary rounded-pill w-100 fw-bold shadow-sm" data-bs-dismiss="modal">Fechar Ficha</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 {{-- Botões de Ação (Apenas se o pedido ainda for "pendente") --}}
                                 @if($pedido->status == 'pendente')
                                     <div class="d-flex gap-3 justify-content-end border-top pt-3">

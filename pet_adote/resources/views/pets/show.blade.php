@@ -144,17 +144,35 @@
 
                 @if(auth()->id() != $pet->user_id)
                     @if(!$pedidoExistente)
-                        <form action="{{ route('adocoes.store', $pet->id) }}" method="POST">
-                            @csrf
+                        @php
+                                $user = auth()->user();
+                                $fichaCompleta = $user->tipo_residencia && $user->seguranca && $user->outros_pets && $user->criancas && $user->tempo_sozinho;
+                            @endphp
 
-                            <input type="hidden" name="pet_id" value="{{ $pet->id }}">
-
-                            <input type="hidden" name="pet" value="{{ $pet->id }}">
-
-                            <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill fw-bold shadow mb-3">
-                                <i class="bi bi-chat-heart me-2"></i> Enviar Pedido de Adoção
-                            </button>
-                        </form>
+                            @if($fichaCompleta)
+                                {{-- Ficha preenchida, mostra o botão normal --}}
+                                <form action="{{ route('adocoes.store', $pet->id) }}" method="POST">
+                                    @csrf
+                                    <input type="hidden" name="pet_id" value="{{ $pet->id }}">
+                                    <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill fw-bold shadow mb-3">
+                                        <i class="bi bi-chat-heart me-2"></i> Solicitar Adoção
+                                    </button>
+                                </form>
+                            @else
+                                {{-- Ficha vazia, bloqueia adoção e pede pra preencher --}}
+                                <div class="alert alert-warning border-0 shadow-sm rounded-4 text-center mt-4 p-4">
+                                    <div class="bg-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3 shadow-sm" style="width: 60px; height: 60px;">
+                                        <i class="bi bi-card-checklist text-warning fs-3"></i>
+                                    </div>
+                                    <h5 class="fw-bold text-dark">Falta pouco!</h5>
+                                    <p class="text-muted small mb-3">Para garantir a segurança do pet, você precisa completar sua <strong>Ficha de Adotante</strong> antes de solicitar a adoção.</p>
+                                    
+                                    {{-- Dica: Se a rota do seu perfil for diferente de 'perfil.edit', ajuste o nome abaixo --}}
+                                    <a href="{{ url('/perfil') }}" class="btn btn-dark w-100 rounded-pill fw-bold shadow-sm">
+                                        <i class="bi bi-pencil-square me-2"></i> Completar Ficha Agora
+                                    </a>
+                                </div>
+                            @endif
                     @else
                         <div class="alert alert-warning border-0 rounded-4 text-center mb-3">
                             <i class="bi bi-clock-history me-2"></i> 
