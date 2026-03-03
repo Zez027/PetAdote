@@ -18,7 +18,7 @@ class AdoptionController extends Controller
         $requests = AdoptionRequest::whereHas('pet', function ($query) {
             $query->where('user_id', Auth::id());
         })
-        ->with(['pet', 'user'])
+        ->with(['pet', 'pet.photos'])
         ->latest()
         ->paginate(10); // Melhoria: Paginação
 
@@ -65,7 +65,7 @@ class AdoptionController extends Controller
     public function meusPedidos()
     {
         $requests = AdoptionRequest::where('user_id', Auth::id())
-            ->with('pet')
+            ->with(['pet.photos', 'statusLogs'])
             ->latest()
             ->paginate(10); // Melhoria: Paginação
 
