@@ -117,4 +117,29 @@ class AdoptionController extends Controller
 
         return back()->with('success', 'Solicitação rejeitada. A mensagem foi enviada ao adotante!');
     }
+
+    public function updateStatus(Request $request, $id)
+    {
+        $adoptionRequest = AdoptionRequest::findOrFail($id);
+
+        // Validação de segurança: apenas o dono do Pet pode mudar o status
+        if ($adoptionRequest->pet->user_id !== Auth::id()) {
+            abort(403, 'Ação não autorizada.');
+        }
+
+        $request->validate([
+            'status' => 'required|in:em_analise,aprovado,rejeitado',
+            'motivo_rejeicao' => 'nullable|string|max:255'
+        ]);
+
+        $adoptionRequest->status = $request->status;
+        
+        if ($request->status === 'rejeitado') {
+            $adoptionRequest->motivo_rejeicao = $request->motivo_rejeicao;
+        }
+
+        $adoptionRequest->save();
+
+        return redirect()->back()->with('success', 'Status da solicitação atualizado com sucesso!');
+    }
 }

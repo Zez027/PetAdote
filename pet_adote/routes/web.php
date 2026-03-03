@@ -106,5 +106,6 @@ Route::middleware('auth')->group(function () {
         Route::post('/solicitacoes/{id}/rejeitar', [AdoptionController::class, 'reject'])->name('adoptions.reject');
         Route::get('/meus-pedidos', [AdoptionController::class, 'meusPedidos'])->name('adoptions.meus_pedidos');
         Route::get('/meus-pets', [PetController::class, 'meusPets'])->name('pets.meus');
+        Route::put('/adocoes/{id}/status', [AdoptionController::class, 'updateStatus'])->name('adoptions.updateStatus');
     });
 });

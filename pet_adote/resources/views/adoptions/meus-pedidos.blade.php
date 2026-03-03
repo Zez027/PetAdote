@@ -26,99 +26,143 @@
         <div class="row g-4">
             @foreach($requests as $pedido)
                 <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden hover-up">
-                        
-                        {{-- Topo do Card: Foto do Pet --}}
-                        <div class="position-relative" style="height: 180px;">
-                             @php
-                                $foto = $pedido->pet->photos->where('is_main', true)->first() ?? $pedido->pet->photos->first();
-                                $urlFoto = $foto ? asset('storage/' . $foto->foto) : asset('images/sem-foto.png');
+                    <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
+                        {{-- Foto do Pet --}}
+                        <div class="position-relative">
+                            @php
+                                $fotoPrincipal = $pedido->pet->photos->where('is_main', true)->first() ?? $pedido->pet->photos->first();
+                                $urlPrincipal = $fotoPrincipal ? asset('storage/' . $fotoPrincipal->foto) : asset('images/sem-foto.png');
                             @endphp
-                            <img src="{{ $urlFoto }}" class="w-100 h-100" style="object-fit: cover;" alt="{{ $pedido->pet->name }}">
+                            <img src="{{ $urlPrincipal }}" class="card-img-top object-fit-cover" style="height: 200px;" alt="{{ $pedido->pet->nome }}">
                             
-                            {{-- Badge de Status Flutuante --}}
-                            <div class="position-absolute top-0 end-0 m-3">
-                                @if($pedido->status == 'pendente')
-                                    <span class="badge bg-warning text-dark rounded-pill px-3 shadow-sm">
-                                        <i class="bi bi-clock-history me-1"></i> Pendente
-                                    </span>
-                                @elseif($pedido->status == 'aprovado')
-                                    <span class="badge bg-success rounded-pill px-3 shadow-sm">
-                                        <i class="bi bi-check-circle-fill me-1"></i> Aprovado
-                                    </span>
-                                @else
-                                    <span class="badge bg-danger rounded-pill px-3 shadow-sm">
-                                        <i class="bi bi-x-circle-fill me-1"></i> Rejeitado
-                                    </span>
+                            {{-- Badge de Status --}}
+                            <div class="position-absolute top-0 end-0 p-3">
+                                @if($pedido->status === 'pendente')
+                                    <span class="badge bg-warning text-dark fs-6 shadow"><i class="bi bi-hourglass-split"></i> Pendente</span>
+                                @elseif($pedido->status === 'em_analise')
+                                    <span class="badge bg-info text-dark fs-6 shadow"><i class="bi bi-search"></i> Em Análise</span>
+                                @elseif($pedido->status === 'aprovado')
+                                    <span class="badge bg-success fs-6 shadow"><i class="bi bi-check-circle"></i> Aprovado</span>
+                                @elseif($pedido->status === 'rejeitado')
+                                    <span class="badge bg-danger fs-6 shadow"><i class="bi bi-x-circle"></i> Rejeitado</span>
                                 @endif
                             </div>
                         </div>
 
                         <div class="card-body p-4">
-                            <h5 class="fw-bold text-dark mb-1">{{ $pedido->pet->name }}</h5>
-                            <p class="text-muted small mb-3">
-                                <i class="bi bi-geo-alt me-1"></i> {{ $pedido->pet->city ?? $pedido->pet->cidade }} - {{ $pedido->pet->state ?? $pedido->pet->estado }}
-                                 @if($pedido->status == 'rejeitado' && $pedido->motivo_rejeicao)
-                                        <div class="alert alert-danger mt-3 mb-0 border-0 rounded-4 shadow-sm">
-                                            <strong class="d-block mb-1"><i class="bi bi-info-circle-fill me-1"></i> Motivo da recusa informado pelo doador:</strong>
-                                            <span class="text-dark" style="font-style: italic;">"{{ $pedido->motivo_rejeicao }}"</span>
-                                        </div>
-                                    @endif
-                            </p>
+                            <h4 class="card-title fw-bold mb-3">{{ $pedido->pet->nome }}</h4>
+                            
+                            <ul class="list-unstyled mb-4 text-muted">
+                                <li class="mb-2"><i class="bi bi-calendar-event me-2"></i> Pedido em: {{ $pedido->created_at->format('d/m/Y') }}</li>
+                                <li><i class="bi bi-person-heart me-2"></i> Doador: {{ $pedido->pet->user->name }}</li>
+                            </ul>
 
-                            <div class="d-flex align-items-center mb-4 p-2 bg-light rounded-3">
-                                @if($pedido->pet->user->profile_photo)
-                                    <img src="{{ asset('storage/' . $pedido->pet->user->profile_photo) }}" 
-                                         class="rounded-circle me-2" width="30" height="30" style="object-fit: cover;">
-                                @else
-                                    <i class="bi bi-person-circle me-2 text-secondary"></i>
-                                @endif
-                                <small class="text-muted">Doador: <strong>{{ explode(' ', $pedido->pet->user->name)[0] }}</strong></small>
-                            </div>
+                            @if($pedido->status === 'rejeitado' && $pedido->motivo_rejeicao)
+                                <div class="alert alert-danger p-2 fs-7 rounded-3">
+                                    <strong>Motivo:</strong> {{ $pedido->motivo_rejeicao }}
+                                </div>
+                            @endif
 
-                            <div class="d-grid gap-2">
-                                <a href="{{ route('pets.show', $pedido->pet_id) }}" class="btn btn-outline-primary rounded-pill fw-bold">
-                                    Ver Detalhes
-                                </a>
-
-                                @if($pedido->status == 'aprovado')
-                                    @php
-                                        // Limpa o número para o link do WhatsApp
-                                        $contato = $pedido->pet->user->phone ?? $pedido->pet->user->contato;
-                                        $whatsapp = preg_replace('/\D/', '', $contato);
-                                    @endphp
-                                    <a href="https://wa.me/55{{ $whatsapp }}" 
-                                       target="_blank" class="btn btn-success rounded-pill fw-bold shadow-sm">
-                                        <i class="bi bi-whatsapp me-2"></i> Chamar no Whats
-                                    </a>
-                                @endif
-                            </div>
+                            @if($pedido->status === 'em_analise')
+                                <div class="alert alert-info p-2 fs-7 rounded-3">
+                                    O doador está avaliando sua solicitação e pode entrar em contato com você em breve.
+                                </div>
+                            @endif
                         </div>
 
-                        <div class="card-footer bg-white border-0 text-center pb-3">
-                            <small class="text-muted" style="font-size: 0.7rem;">
-                                Pedido enviado em {{ $pedido->created_at->format('d/m/Y') }}
-                            </small>
+                        <div class="card-footer bg-white border-top-0 p-4 pt-0 d-grid gap-2">
+                            <a href="{{ route('pets.show', $pedido->pet->id) }}" class="btn btn-outline-primary rounded-pill fw-bold">
+                                Ver Detalhes do Pet
+                            </a>
+                            <button class="btn btn-light rounded-pill fw-bold" data-bs-toggle="modal" data-bs-target="#historicoModal{{ $pedido->id }}">
+                                <i class="bi bi-clock-history"></i> Ver Histórico
+                            </button>
                         </div>
                     </div>
                 </div>
+
+                {{-- Modal de Histórico --}}
+                <div class="modal fade" id="historicoModal{{ $pedido->id }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                        <div class="modal-content border-0 rounded-4">
+                            <div class="modal-header bg-light border-0 p-4">
+                                <h5 class="modal-title fw-bold"><i class="bi bi-clock-history me-2 text-primary"></i> Histórico da Solicitação</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body p-4">
+                                @if(isset($pedido->statusLogs) && $pedido->statusLogs->count() > 0)
+                                    <div class="timeline position-relative">
+                                        @foreach($pedido->statusLogs as $log)
+                                            <div class="d-flex mb-4 position-relative z-1">
+                                                <div class="me-3">
+                                                    @if($log->status === 'pendente')
+                                                        <div class="bg-warning text-dark rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px;">
+                                                            <i class="bi bi-hourglass-split"></i>
+                                                        </div>
+                                                    @elseif($log->status === 'em_analise')
+                                                        <div class="bg-info text-dark rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px;">
+                                                            <i class="bi bi-search"></i>
+                                                        </div>
+                                                    @elseif($log->status === 'aprovado')
+                                                        <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px;">
+                                                            <i class="bi bi-check-lg"></i>
+                                                        </div>
+                                                    @elseif($log->status === 'rejeitado')
+                                                        <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px;">
+                                                            <i class="bi bi-x-lg"></i>
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                                <div>
+                                                    <h6 class="fw-bold mb-1">
+                                                        Status alterado para 
+                                                        <span class="text-capitalize">{{ str_replace('_', ' ', $log->status) }}</span>
+                                                    </h6>
+                                                    <p class="text-muted mb-1 fs-7">
+                                                        <i class="bi bi-calendar3 me-1"></i> {{ $log->created_at->format('d/m/Y H:i') }}
+                                                    </p>
+                                                    @if($log->observacao)
+                                                        <div class="bg-light p-2 rounded fs-7 mt-2 text-muted">
+                                                            "{{ $log->observacao }}"
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                    <style>
+                                        .timeline::before {
+                                            content: '';
+                                            position: absolute;
+                                            left: 20px;
+                                            top: 0;
+                                            bottom: 0;
+                                            width: 2px;
+                                            background-color: #e9ecef;
+                                            z-index: 0;
+                                        }
+                                    </style>
+                                @else
+                                    <div class="text-center py-4">
+                                        <p class="text-muted">Nenhum histórico detalhado disponível.</p>
+                                    </div>
+                                @endif
+                            </div>
+                            <div class="modal-footer border-0 p-4 pt-0">
+                                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Fechar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             @endforeach
         </div>
 
-        {{-- Adicionado paginação que faltava no seu original --}}
-        <div class="mt-4 d-flex justify-content-center">
-            {{ $requests->links() }}
-        </div>
+        @if(method_exists($requests, 'hasPages') && $requests->hasPages())
+            <div class="mt-5 d-flex justify-content-center">
+                {{ $requests->links() }}
+            </div>
+        @endif
     @endif
 </div>
-
-<style>
-    .hover-up {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .hover-up:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 15px 30px rgba(0,0,0,0.1) !important;
-    }
-</style>
 @endsection
