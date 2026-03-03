@@ -140,7 +140,12 @@ class AuthController extends Controller
             'pais' => 'required|string|max:100',
             'estado' => 'required|string|max:100',
             'cidade' => 'required|string|max:100',
-            'profile_photo' => 'nullable|image|max:2048'
+            'profile_photo' => 'nullable|image|max:2048',
+            'tipo_residencia' => ['nullable', 'string', 'max:255'],
+            'seguranca' => ['nullable', 'string', 'max:255'],
+            'outros_pets' => ['nullable', 'string', 'max:255'],
+            'criancas' => ['nullable', 'string', 'max:255'],
+            'tempo_sozinho' => ['nullable', 'string', 'max:255'],
         ]);
 
         if ($request->hasFile('profile_photo')) {

@@ -168,7 +168,7 @@
                                     <p class="text-muted small mb-3">Para garantir a segurança do pet, você precisa completar sua <strong>Ficha de Adotante</strong> antes de solicitar a adoção.</p>
                                     
                                     {{-- Dica: Se a rota do seu perfil for diferente de 'perfil.edit', ajuste o nome abaixo --}}
-                                    <a href="{{ url('/perfil') }}" class="btn btn-dark w-100 rounded-pill fw-bold shadow-sm">
+                                    <a href="{{ route('perfil.edit') }}" class="btn btn-dark w-100 rounded-pill fw-bold shadow-sm">
                                         <i class="bi bi-pencil-square me-2"></i> Completar Ficha Agora
                                     </a>
                                 </div>
