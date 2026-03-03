@@ -121,32 +121,43 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body p-4">
-                                <p><strong>Nome:</strong> {{ $pedido->user->name }}</p>
-                                <p><strong>Email:</strong> {{ $pedido->user->email }}</p>
-                                <p><strong>Telefone:</strong> {{ $pedido->user->contato ?? 'Não informado' }}</p>
-
                                 <ul class="list-group list-group-flush">
-                                                    <li class="list-group-item px-0 border-0 mb-3 bg-transparent">
-                                                        <small class="text-muted fw-bold d-block mb-1"><i class="bi bi-house-door-fill me-2 text-secondary"></i>TIPO DE MORADIA</small>
-                                                        <span class="fs-6 text-dark fw-medium">{{ $pedido->user->tipo_residencia ?? 'Não informado' }}</span>
-                                                    </li>
-                                                    <li class="list-group-item px-0 border-0 mb-3 bg-transparent">
-                                                        <small class="text-muted fw-bold d-block mb-1"><i class="bi bi-shield-shaded me-2 text-secondary"></i>SEGURANÇA (TELAS/MUROS)</small>
-                                                        <span class="fs-6 text-dark fw-medium">{{ $pedido->user->seguranca ?? 'Não informado' }}</span>
-                                                    </li>
-                                                    <li class="list-group-item px-0 border-0 mb-3 bg-transparent">
-                                                        <small class="text-muted fw-bold d-block mb-1"><i class="bi bi-info-square-fill me-2 text-secondary"></i>OUTROS ANIMAIS NA CASA?</small>
-                                                        <span class="fs-6 text-dark fw-medium">{{ $pedido->user->outros_pets ?? 'Não informado' }}</span>
-                                                    </li>
-                                                    <li class="list-group-item px-0 border-0 mb-3 bg-transparent">
-                                                        <small class="text-muted fw-bold d-block mb-1"><i class="bi bi-people-fill me-2 text-secondary"></i>CRIANÇAS EM CASA?</small>
-                                                        <span class="fs-6 text-dark fw-medium">{{ $pedido->user->criancas ?? 'Não informado' }}</span>
-                                                    </li>
-                                                    <li class="list-group-item px-0 border-0 bg-transparent border-top pt-3">
-                                                        <small class="text-muted fw-bold d-block mb-1"><i class="bi bi-clock-fill me-2 text-secondary"></i>TEMPO SOZINHO POR DIA</small>
-                                                        <span class="fs-6 text-dark fw-medium">{{ $pedido->user->tempo_sozinho ?? 'Não informado' }}</span>
-                                                    </li>
-                                                </ul>
+
+                                        <li class="list-group-item px-0 border-0 mb-3 bg-transparent">
+                                            <small class="text-muted fw-bold d-block mb-1"><i class="bi bi-person-fill me-2 text-secondary"></i>NOME</small>
+                                            <span class="fs-6 text-dark fw-medium">{{ $pedido->user->name }}</span>
+                                        </li>
+
+                                        <li class="list-group-item px-0 border-0 mb-3 bg-transparent">
+                                            <small class="text-muted fw-bold d-block mb-1"><i class="bi bi-envelope-at-fill me-2 text-secondary"></i>EMAIL</small>
+                                            <span class="fs-6 text-dark fw-medium">{{ $pedido->user->email }}</span>
+                                        </li>
+
+                                        <li class="list-group-item px-0 border-0 mb-3 bg-transparent">
+                                            <small class="text-muted fw-bold d-block mb-1"><i class="bi bi-whatsapp me-2 text-secondary"></i>TELEFONE</small>
+                                            <span class="fs-6 text-dark fw-medium">{{ $pedido->user->contato ?? 'Não informado' }}</span>
+                                        </li>
+                                        <li class="list-group-item px-0 border-0 mb-3 bg-transparent">
+                                            <small class="text-muted fw-bold d-block mb-1"><i class="bi bi-house-door-fill me-2 text-secondary"></i>TIPO DE MORADIA</small>
+                                            <span class="fs-6 text-dark fw-medium">{{ $pedido->user->tipo_residencia ?? 'Não informado' }}</span>
+                                        </li>
+                                        <li class="list-group-item px-0 border-0 mb-3 bg-transparent">
+                                            <small class="text-muted fw-bold d-block mb-1"><i class="bi bi-shield-shaded me-2 text-secondary"></i>SEGURANÇA (TELAS/MUROS)</small>
+                                            <span class="fs-6 text-dark fw-medium">{{ $pedido->user->seguranca ?? 'Não informado' }}</span>
+                                        </li>
+                                        <li class="list-group-item px-0 border-0 mb-3 bg-transparent">
+                                            <small class="text-muted fw-bold d-block mb-1"><i class="bi bi-info-square-fill me-2 text-secondary"></i>OUTROS ANIMAIS NA CASA?</small>
+                                            <span class="fs-6 text-dark fw-medium">{{ $pedido->user->outros_pets ?? 'Não informado' }}</span>
+                                        </li>
+                                        <li class="list-group-item px-0 border-0 mb-3 bg-transparent">
+                                            <small class="text-muted fw-bold d-block mb-1"><i class="bi bi-people-fill me-2 text-secondary"></i>CRIANÇAS EM CASA?</small>
+                                            <span class="fs-6 text-dark fw-medium">{{ $pedido->user->criancas ?? 'Não informado' }}</span>
+                                        </li>
+                                        <li class="list-group-item px-0 border-0 bg-transparent border-top pt-3">
+                                            <small class="text-muted fw-bold d-block mb-1"><i class="bi bi-clock-fill me-2 text-secondary"></i>TEMPO SOZINHO POR DIA</small>
+                                            <span class="fs-6 text-dark fw-medium">{{ $pedido->user->tempo_sozinho ?? 'Não informado' }}</span>
+                                        </li>
+                                    </ul>
                                 @if($pedido->user->adopter_profile)
                                     <hr>
                                     <h6><strong>Perfil e Experiência:</strong></h6>
