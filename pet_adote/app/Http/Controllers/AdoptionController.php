@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Notifications\NewAdoptionRequestNotification;
 use App\Notifications\AdoptionStatusUpdatedNotification;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class AdoptionController extends Controller
 {
@@ -141,11 +142,43 @@ class AdoptionController extends Controller
         if ($request->status === 'rejeitado') {
             $adoptionRequest->motivo_rejeicao = $request->motivo_rejeicao;
         }
+        elseif ($request->status === 'aprovado') {
+            AdoptionRequest::where('pet_id', $adoptionRequest->pet_id)
+                ->where('id', '!=', $adoptionRequest->id)
+                ->where('status', 'pendente')
+                ->update(['status' => 'rejeitado']);
+             
+            // Pet não aparecerá mais para adoção pública, mas os dados permanecem salvos.
+            $adoptionRequest->pet->delete();
+        }
 
         $adoptionRequest->save();
 
         $adoptionRequest->user->notify(new AdoptionStatusUpdatedNotification($adoptionRequest));
 
         return redirect()->back()->with('success', 'Status da solicitação atualizado com sucesso!');
+    }
+
+    /**
+     * Gera o PDF do Termo de Adoção Responsável
+     */
+    public function downloadContract($id)
+    {
+        $adoptionRequest = AdoptionRequest::with(['user', 'pet.user'])->findOrFail($id);
+
+        // Segurança: Só o doador ou o adotante daquele pedido podem baixar o contrato
+        if (Auth::id() !== $adoptionRequest->user_id && Auth::id() !== $adoptionRequest->pet->user_id) {
+            abort(403, 'Acesso não autorizado.');
+        }
+
+        if ($adoptionRequest->status !== 'aprovado') {
+            abort(400, 'O contrato só está disponível após a aprovação da adoção.');
+        }
+
+        // Gera o PDF a partir de uma view que vamos criar
+        $pdf = Pdf::loadView('adoptions.contract', compact('adoptionRequest'));
+        
+        // Retorna o download do arquivo
+        return $pdf->download('termo_adocao_' . strtolower(str_replace(' ', '_', $adoptionRequest->pet->nome)) . '.pdf');
     }
 }

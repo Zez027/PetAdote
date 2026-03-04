@@ -72,6 +72,12 @@
                                         <i class="bi bi-person-vcard"></i> Ver Perfil
                                     </button>
 
+                                    @if($pedido->status === 'aprovado')
+                                        <a href="{{ route('adoptions.contract', $pedido->id) }}" class="btn btn-sm btn-outline-dark fw-bold rounded-pill">
+                                            <i class="bi bi-file-earmark-pdf text-danger"></i> Termo de Adoção
+                                        </a>
+                                    @endif
+
                                     @if($pedido->status === 'pendente')
                                         {{-- Botão Iniciar Entrevista --}}
                                         <form action="{{ route('adoptions.updateStatus', $pedido->id) }}" method="POST" class="d-inline">

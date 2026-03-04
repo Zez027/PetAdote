@@ -107,5 +107,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/meus-pedidos', [AdoptionController::class, 'meusPedidos'])->name('adoptions.meus_pedidos');
         Route::get('/meus-pets', [PetController::class, 'meusPets'])->name('pets.meus');
         Route::put('/adocoes/{id}/status', [AdoptionController::class, 'updateStatus'])->name('adoptions.updateStatus');
+
+        //termo de adocao
+        Route::get('/adocoes/{id}/contrato', [AdoptionController::class, 'downloadContract'])->name('adoptions.contract');
     });
 });

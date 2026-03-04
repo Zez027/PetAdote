@@ -77,6 +77,12 @@
                             <button class="btn btn-light rounded-pill fw-bold" data-bs-toggle="modal" data-bs-target="#historicoModal{{ $pedido->id }}">
                                 <i class="bi bi-clock-history"></i> Ver Histórico
                             </button>
+
+                            @if($pedido->status === 'aprovado')
+                                <a href="{{ route('adoptions.contract', $pedido->id) }}" class="btn btn-sm btn-outline-dark fw-bold rounded-pill">
+                                <i class="bi bi-file-earmark-pdf text-danger"></i> Termo de Adoção
+                                </a>
+                            @endif
                         </div>
                     </div>
                 </div>
