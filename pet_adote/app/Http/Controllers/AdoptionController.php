@@ -18,14 +18,18 @@ class AdoptionController extends Controller
      */
     public function index()
     {
-        $requests = AdoptionRequest::whereHas('pet', function ($query) {
+        $baseQuery = AdoptionRequest::whereHas('pet', function ($query) {
             $query->withTrashed()->where('user_id', Auth::id());
-        })
-        ->with(['pet', 'pet.photos'])
-        ->latest()
-        ->paginate(10); // Melhoria: Paginação
+        })->with(['pet', 'pet.photos', 'user'])->latest();
 
-        return view('adoptions.index', compact('requests'));
+        // consultas por status
+        $pendentes = (clone $baseQuery)->whereIn('status', ['pendente', 'em_analise'])->get();
+        $aprovados = (clone $baseQuery)->where('status', 'aprovado')->get();
+        $rejeitados = (clone $baseQuery)->where('status', 'rejeitado')->get();
+
+        $totalRequests = $pendentes->count() + $aprovados->count() + $rejeitados->count();
+
+        return view('adoptions.index', compact('pendentes', 'aprovados', 'rejeitados', 'totalRequests'));
     }
 
     /**
