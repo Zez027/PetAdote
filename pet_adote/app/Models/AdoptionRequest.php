@@ -10,7 +10,7 @@ class AdoptionRequest extends Model
     use HasFactory;
     protected $fillable = ['user_id', 'pet_id', 'status', 'motivo_rejeicao'];
 
-    public function pet() { return $this->belongsTo(Pet::class); }
+    public function pet() { return $this->belongsTo(Pet::class)->withTrashed(); }
     public function user() { return $this->belongsTo(User::class); }
 
     public function statusLogs()

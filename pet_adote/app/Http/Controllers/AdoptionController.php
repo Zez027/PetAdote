@@ -19,7 +19,7 @@ class AdoptionController extends Controller
     public function index()
     {
         $requests = AdoptionRequest::whereHas('pet', function ($query) {
-            $query->where('user_id', Auth::id());
+            $query->withTrashed()->where('user_id', Auth::id());
         })
         ->with(['pet', 'pet.photos'])
         ->latest()
