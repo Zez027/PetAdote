@@ -7,6 +7,8 @@ use App\Models\Pet;
 use App\Http\Requests\StoreAdoptionRequest; // Importando o novo Request
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Notifications\NewAdoptionRequestNotification;
+use App\Notifications\AdoptionStatusUpdatedNotification;
 
 class AdoptionController extends Controller
 {
@@ -55,6 +57,8 @@ class AdoptionController extends Controller
             'pet_id'  => $request->pet_id,
             'status'  => 'pendente',
         ]);
+
+        $pet->user->notify(new NewAdoptionRequestNotification($adoptionRequest));
 
         return redirect()->back()->with('success', 'Solicitação de adoção enviada com sucesso!');
     }
@@ -139,6 +143,8 @@ class AdoptionController extends Controller
         }
 
         $adoptionRequest->save();
+
+        $adoptionRequest->user->notify(new AdoptionStatusUpdatedNotification($adoptionRequest));
 
         return redirect()->back()->with('success', 'Status da solicitação atualizado com sucesso!');
     }
