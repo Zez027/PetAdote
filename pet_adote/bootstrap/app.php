@@ -14,6 +14,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin' => \App\Http\Middleware\CheckAdmin::class,
         ]);
+
+        $middleware->appendToGroup('web', \App\Http\Middleware\CheckSuspended::class);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

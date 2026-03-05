@@ -10,7 +10,7 @@
                 </div>
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
-                    <li class="list-group-item text-muted">Gerenciar Utilizadores (Em breve)</li>
+                    <li class="list-group-item"><a href="{{ route('admin.users.index') }}">Gerenciar Usuários</a></li>
                     <li class="list-group-item text-muted">Gerenciar Pets (Em breve)</li>
                     <li class="list-group-item text-muted">Adoções (Em breve)</li>
                 </ul>

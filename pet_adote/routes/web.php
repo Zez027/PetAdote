@@ -10,6 +10,8 @@ use App\Http\Controllers\AdoptionController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\AdminUserController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -117,7 +119,10 @@ Route::middleware('auth')->group(function () {
     Rotas para Administradores (Exigem Middleware 'admin')
     */ 
     Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
+        Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
+        Route::get('/usuarios', [AdminUserController::class, 'index'])->name('users.index');
+        Route::get('/usuarios/{id}', [AdminUserController::class, 'show'])->name('users.show');
+        Route::put('/usuarios/{id}/suspender', [AdminUserController::class, 'toggleSuspension'])->name('users.suspend');
     });
 
 });
