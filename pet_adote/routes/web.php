@@ -9,6 +9,7 @@ use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\AdoptionController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Admin\AdminController;
 
 /*
 |--------------------------------------------------------------------------
@@ -111,4 +112,12 @@ Route::middleware('auth')->group(function () {
         //termo de adocao
         Route::get('/adocoes/{id}/contrato', [AdoptionController::class, 'downloadContract'])->name('adoptions.contract');
     });
+
+    /*
+    Rotas para Administradores (Exigem Middleware 'admin')
+    */ 
+    Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
+    });
+
 });
