@@ -16,14 +16,12 @@ class AdminPetController extends Controller
             $search = $request->search;
             $query->where(function($q) use ($search) {
                 $q->where('nome', 'like', "%{$search}%")
+                  ->orWhere('tipo', 'like', "%{$search}%")
+                  ->orWhere('raca', 'like', "%{$search}%") 
                   ->orWhereHas('user', function($userQuery) use ($search) {
                       $userQuery->where('name', 'like', "%{$search}%");
                   });
             });
-        }
-
-        if ($request->filled('tipo')) {
-            $query->where('tipo', $request->species);
         }
 
         if ($request->filled('status')) {
