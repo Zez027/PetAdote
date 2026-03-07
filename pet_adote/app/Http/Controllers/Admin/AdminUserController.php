@@ -8,9 +8,31 @@ use App\Models\User;
 
 class AdminUserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::latest()->paginate(15);
+        $query = User::query();
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('role')) {
+            $query->where('role', $request->role);
+        }
+
+        if ($request->filled('status')) {
+            if ($request->status === 'active') {
+                $query->where('is_suspended', false);
+            } elseif ($request->status === 'suspended') {
+                $query->where('is_suspended', true);
+            }
+        }
+
+        $users = $query->latest()->paginate(15)->withQueryString();
         
         return view('admin.users.index', compact('users'));
     }
@@ -18,7 +40,6 @@ class AdminUserController extends Controller
     public function show($id)
     {
         $user = User::findOrFail($id);
-        
         return view('admin.users.show', compact('user'));
     }
 
