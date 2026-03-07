@@ -35,7 +35,7 @@ class HomeController extends Controller
             $query->where('cidade', $request->cidade);
         }
 
-        $pets = $query->latest()->paginate(9)->withQueryString();
+        $pets = $query->latest()->paginate(12)->withQueryString();
 
         $cidades = Pet::select('cidade')
                     ->whereNotNull('cidade')

@@ -34,7 +34,7 @@ class PetController extends Controller
             $query->where('cidade', $request->cidade);
         }
 
-        $pets = $query->latest()->get();
+        $pets = $query->orderBy('created_at', 'desc')->paginate(12);
 
         // Pega as cidades dinamicamente para o filtro
         $cidades = Pet::where('status', 'disponivel')->distinct()->pluck('cidade');
