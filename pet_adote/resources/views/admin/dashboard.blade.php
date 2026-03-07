@@ -96,7 +96,7 @@
                 </div>
             </div>
 
-            <div class="row">
+            <div class="row mb-4">
                 <div class="col-lg-8 mb-4">
                     <div class="card shadow-sm border-0 rounded-3 h-100">
                         <div class="card-header bg-white border-bottom py-3">
@@ -120,6 +120,25 @@
                 </div>
             </div>
 
+            <div class="row">
+                <div class="col-12 mb-4">
+                    <div class="card shadow-sm border-0 rounded-3 h-100">
+                        <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                            <h6 class="m-0 fw-bold text-dark">Evolução de Adoções</h6>
+                            <select id="seletorPeriodo" class="form-select form-select-sm w-auto shadow-sm">
+                                <option value="mensal" selected>Mensal (Este Ano)</option>
+                                <option value="bimestral">Bimestral (Este Ano)</option>
+                                <option value="trimestral">Trimestral (Este Ano)</option>
+                                <option value="anual">Anual (Últimos 5 anos)</option>
+                            </select>
+                        </div>
+                        <div class="card-body p-4">
+                            <canvas id="graficoEvolucao" style="height: 350px; width: 100%;"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
@@ -129,7 +148,7 @@
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         
-        // --- 1. CONFIGURAÇÃO DO GRÁFICO DE ADOÇÕES (BARRAS) ---
+        // --- 1. GRÁFICO DE BARRAS (STATUS ADOÇÕES) ---
         const dadosAdocoes = @json($adocoesPorStatus);
         const labelsAdocoes = Object.keys(dadosAdocoes).map(status => status.charAt(0).toUpperCase() + status.slice(1));
         const valoresAdocoes = Object.values(dadosAdocoes);
@@ -142,25 +161,25 @@
                     label: 'Quantidade',
                     data: valoresAdocoes,
                     backgroundColor: [
-                        'rgba(54, 162, 235, 0.7)',  // Azul (ex: pendente)
-                        'rgba(75, 192, 192, 0.7)',  // Verde (ex: aprovado)
-                        'rgba(255, 99, 132, 0.7)',  // Vermelho (ex: rejeitado)
-                        'rgba(255, 206, 86, 0.7)',  // Amarelo
-                        'rgba(153, 102, 255, 0.7)'  // Roxo
+                        'rgba(54, 162, 235, 0.7)',
+                        'rgba(75, 192, 192, 0.7)',
+                        'rgba(255, 99, 132, 0.7)',
+                        'rgba(255, 206, 86, 0.7)',
+                        'rgba(153, 102, 255, 0.7)'
                     ],
                     borderWidth: 1,
-                    borderRadius: 5 // Deixa a pontinha da barra arredondada
+                    borderRadius: 5
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { display: false } }, // Esconde a legenda
+                plugins: { legend: { display: false } },
                 scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
             }
         });
 
-        // --- 2. CONFIGURAÇÃO DO GRÁFICO DE PETS (ROSCA / DOUGHNUT) ---
+        // --- 2. GRÁFICO DE ROSCA (PETS POR ESPÉCIE) ---
         const dadosPets = @json($petsPorEspecie);
         const labelsPets = Object.keys(dadosPets);
         const valoresPets = Object.values(dadosPets);
@@ -171,24 +190,84 @@
                 labels: labelsPets,
                 datasets: [{
                     data: valoresPets,
-                    backgroundColor: [
-                        '#4e73df', // Azul forte
-                        '#1cc88a', // Verde forte
-                        '#36b9cc', // Ciano
-                        '#f6c23e', // Amarelo
-                        '#e74a3b'  // Vermelho
-                    ],
+                    backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b'],
                     hoverOffset: 4
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                cutout: '70%', // Espessura da rosca
-                plugins: {
-                    legend: { position: 'bottom' }
-                }
+                cutout: '70%',
+                plugins: { legend: { position: 'bottom' } }
             }
+        });
+
+        // --- 3. GRÁFICO DE LINHA (EVOLUÇÃO TEMPORAL) ---
+        let graficoEvolucaoChart; // Guarda a instância do gráfico para podermos atualizá-lo depois
+
+        function carregarDadosEvolucao(periodo) {
+            // Fazer a requisição AJAX para buscar os dados baseados no período escolhido
+            fetch(`{{ route('admin.chart_data') }}?periodo=${periodo}`)
+                .then(response => response.json())
+                .then(dados => {
+                    // Se o gráfico já existir, destrói para criar um novo com os novos dados
+                    if (graficoEvolucaoChart) {
+                        graficoEvolucaoChart.destroy();
+                    }
+
+                    const ctxEvolucao = document.getElementById('graficoEvolucao').getContext('2d');
+                    
+                    // Criar um gradiente bonitinho para preencher debaixo da linha
+                    let gradiente = ctxEvolucao.createLinearGradient(0, 0, 0, 400);
+                    gradiente.addColorStop(0, 'rgba(78, 115, 223, 0.5)'); // Azul forte no topo
+                    gradiente.addColorStop(1, 'rgba(78, 115, 223, 0.0)'); // Transparente em baixo
+
+                    graficoEvolucaoChart = new Chart(ctxEvolucao, {
+                        type: 'line',
+                        data: {
+                            labels: dados.labels,
+                            datasets: [{
+                                label: 'Adoções realizadas',
+                                data: dados.data,
+                                borderColor: '#4e73df', // Linha azul
+                                backgroundColor: gradiente, // Preenchimento suave
+                                borderWidth: 3,
+                                pointBackgroundColor: '#4e73df',
+                                pointBorderColor: '#fff',
+                                pointHoverBackgroundColor: '#fff',
+                                pointHoverBorderColor: '#4e73df',
+                                pointRadius: 4,
+                                pointHoverRadius: 6,
+                                fill: true,
+                                tension: 0.3 // Deixa a linha curvadinha e suave
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: false } },
+                            scales: { 
+                                y: { 
+                                    beginAtZero: true, 
+                                    ticks: { precision: 0 },
+                                    grid: { color: "rgba(0, 0, 0, 0.05)" } 
+                                },
+                                x: {
+                                    grid: { display: false } // Esconde as linhas verticais do fundo
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch(erro => console.error("Erro ao carregar o gráfico de evolução:", erro));
+        }
+
+        // Carregar o gráfico inicialmente (Mensal)
+        carregarDadosEvolucao('mensal');
+
+        // Adicionar evento para quando o administrador alterar a caixinha (select)
+        document.getElementById('seletorPeriodo').addEventListener('change', function() {
+            carregarDadosEvolucao(this.value);
         });
 
     });

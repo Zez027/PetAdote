@@ -122,6 +122,8 @@ Route::middleware('auth')->group(function () {
     */ 
     Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
+        Route::get('/chart-data', [AdminController::class, 'chartData'])->name('chart_data');
+
         //Gestao de usuarios
         Route::get('/usuarios', [AdminUserController::class, 'index'])->name('users.index');
         Route::get('/usuarios/{id}', [AdminUserController::class, 'show'])->name('users.show');
