@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AdminPetController;
+use App\Http\Controllers\Admin\AdminAdoptionController;
 
 
 /*
@@ -130,6 +131,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/pets', [AdminPetController::class, 'index'])->name('pets.index');
         Route::get('/pets/{id}', [AdminPetController::class, 'show'])->name('pets.show');
         Route::put('/pets/{id}/status', [AdminPetController::class, 'toggleStatus'])->name('pets.toggle_status');
+
+        //Gestao de adocoes
+        Route::get('/adocoes', [AdminAdoptionController::class, 'index'])->name('adoptions.index');
+        Route::get('/adocoes/{id}', [AdminAdoptionController::class, 'show'])->name('adoptions.show');
     });
 
 });

@@ -49,7 +49,7 @@
                             <div class="col-md-2 d-flex align-items-end gap-2">
                                 <button type="submit" class="btn btn-primary w-100">Filtrar</button>
                                 <a href="{{ route('admin.users.index') }}" class="btn btn-outline-secondary" title="Limpar Filtros">
-                                    <i class="bi bi-eraser"></i> Limpar
+                                    <i class="bi bi-eraser"></i>
                                 </a>
                             </div>
                         </div>
