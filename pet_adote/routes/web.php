@@ -11,6 +11,7 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Admin\AdminPetController;
 
 
 /*
@@ -120,9 +121,15 @@ Route::middleware('auth')->group(function () {
     */ 
     Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
+        //Gestao de usuarios
         Route::get('/usuarios', [AdminUserController::class, 'index'])->name('users.index');
         Route::get('/usuarios/{id}', [AdminUserController::class, 'show'])->name('users.show');
         Route::put('/usuarios/{id}/suspender', [AdminUserController::class, 'toggleSuspension'])->name('users.suspend');
+
+        //Gestao de pets
+        Route::get('/pets', [AdminPetController::class, 'index'])->name('pets.index');
+        Route::get('/pets/{id}', [AdminPetController::class, 'show'])->name('pets.show');
+        Route::put('/pets/{id}/status', [AdminPetController::class, 'toggleStatus'])->name('pets.toggle_status');
     });
 
 });
