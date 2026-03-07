@@ -37,7 +37,14 @@ class AuthController extends Controller
         if (Auth::attempt($request->only('email', 'password'), $request->filled('remember'))) {
             RateLimiter::clear($throttleKey);
             $request->session()->regenerate();
-            return redirect()->intended(route('home'));
+
+            if (Auth::user()->role === 'admin') {
+                return redirect()->intended(route('admin.dashboard'))
+                ->with('success', 'Bem-vindo ao Painel de Administração!');
+            }
+
+            return redirect()->intended(route('home'))
+            ->with('success', 'Login realizado com sucesso!');
         }
 
         RateLimiter::hit($throttleKey);
@@ -45,8 +52,6 @@ class AuthController extends Controller
         return back()->withErrors([
             'email' => 'E-mail ou senha incorretos.',
         ])->onlyInput('email');
-
-        return back()->withErrors(['email' => 'Credenciais inválidas.'])->onlyInput('email');
     }
 
     /**
