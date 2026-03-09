@@ -111,7 +111,7 @@ class PetController extends Controller
         $pets = Pet::where('user_id', auth()->id())
             ->with('photos')
             ->latest()
-            ->paginate(6);
+            ->paginate(8);
 
         return view('pets.meus-pets', compact('pets'));
     }
@@ -126,7 +126,7 @@ class PetController extends Controller
     public function favoritos()
     {
         // Usa o relacionamento 'favorites' que criamos no Model User
-        $pets = auth()->user()->favorites()->latest()->get();
+        $pets = auth()->user()->favorites()->latest()->paginate(10);
         
         return view('pets.favoritos', compact('pets'));
     }

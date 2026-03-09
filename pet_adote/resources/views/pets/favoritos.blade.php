@@ -61,5 +61,8 @@
             @endforeach
         </div>
     @endif
+    <div class="mt-4 d-flex justify-content-center">
+        {{ $pets->links() }}
+    </div>
 </div>
 @endsection

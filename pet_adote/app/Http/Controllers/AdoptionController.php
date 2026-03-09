@@ -23,9 +23,9 @@ class AdoptionController extends Controller
         })->with(['pet', 'pet.photos', 'user'])->latest();
 
         // consultas por status
-        $pendentes = (clone $baseQuery)->whereIn('status', ['pendente', 'em_analise'])->get();
-        $aprovados = (clone $baseQuery)->where('status', 'aprovado')->get();
-        $rejeitados = (clone $baseQuery)->where('status', 'rejeitado')->get();
+        $pendentes = (clone $baseQuery)->whereIn('status', ['pendente', 'em_analise'])->paginate(8, ['*'], 'pendentes_page');
+        $aprovados = (clone $baseQuery)->where('status', 'aprovado')->paginate(8, ['*'], 'aprovados_page');
+        $rejeitados = (clone $baseQuery)->where('status', 'rejeitado')->paginate(8, ['*'], 'rejeitados_page');
 
         $totalRequests = $pendentes->count() + $aprovados->count() + $rejeitados->count();
 
@@ -73,10 +73,10 @@ class AdoptionController extends Controller
      */
     public function meusPedidos()
     {
-        $requests = AdoptionRequest::where('user_id', Auth::id())
+        $requests = AdoptionRequest::where('user_id', Auth()->id())
             ->with(['pet.photos', 'statusLogs'])
             ->latest()
-            ->paginate(10); // Melhoria: Paginação
+            ->paginate(6); // Melhoria: Paginação
 
         return view('adoptions.meus-pedidos', compact('requests'));
     }

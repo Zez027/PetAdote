@@ -8,6 +8,18 @@ use App\Models\Pet;
 
 class FavoriteController extends Controller
 {
+    public function index()
+{
+    $user = auth()->user();
+    
+    $pets = $user->favorites()
+        ->with('photos')
+        ->latest()
+        ->paginate(8);
+
+    return view('pets.favoritos', compact('pets'));
+}
+
    public function toggle($petId)
     {
         $user = auth()->user();
