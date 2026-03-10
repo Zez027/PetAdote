@@ -75,6 +75,15 @@
                                 {{ explode(' ', auth()->user()->name)[0] }}
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm">
+                                @auth
+                                    @if(auth()->user()->role === 'admin')
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center" href="{{ route('admin.dashboard') }}">
+                                                <i class="bi bi-speedometer2 me-2"></i> Painel Administrativo
+                                            </a>
+                                        </li>
+                                    @endif
+                                @endauth
                                 <li><a class="dropdown-item" href="{{ route('perfil.edit') }}"><i class="bi bi-person me-2"></i>Editar Perfil</a></li>
                                 <li><a class="dropdown-item" href="{{ route('pets.favoritos') }}"><i class="bi bi-heart me-2"></i>Meus Favoritos</a></li>
                                 <li><a class="dropdown-item" href="{{ route('adoptions.meus_pedidos') }}"><i class="bi bi-clipboard2-heart me-2"></i>Meus Pedidos</a></li>
