@@ -126,7 +126,7 @@ class PetController extends Controller
     public function favoritos()
     {
         // Usa o relacionamento 'favorites' que criamos no Model User
-        $pets = auth()->user()->favorites()->latest()->paginate(10);
+        $pets = auth()->user()->favorites()->latest()->paginate(8);
         
         return view('pets.favoritos', compact('pets'));
     }

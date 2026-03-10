@@ -221,4 +221,39 @@
         @endforeach
     </div>
 </div>
+
+<style>
+     /* Customização da Paginação PetAdote */
+    .pagination {
+        gap: 5px; /* Espaço entre os números */
+    }
+
+    .pagination .page-item .page-link {
+        border-radius: 10px !important; /* Botões arredondados */
+        border: none;
+        color: #0d6efd; /* Cor azul do seu projeto */
+        padding: 8px 16px;
+        background-color: #f8f9fa;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .pagination .page-item.active .page-link {
+        background-color: #0d6efd !important; /* Azul escuro para página ativa */
+        color: white !important;
+        font-weight: bold;
+        box-shadow: 0 4px 8px rgba(13, 110, 253, 0.3);
+    }
+
+    .pagination .page-item .page-link:hover {
+        background-color: #e9ecef;
+        transform: translateY(-2px); /* Efeito de levante */
+        color: #0a58ca;
+    }
+
+    /* Esconder o texto "Showing X to Y of Z" para ficar mais minimalista */
+    .pagination-wrapper nav > div:first-child {
+        display: none !important;
+    }
+</style>
 @endsection
