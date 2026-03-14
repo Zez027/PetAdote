@@ -37,4 +37,9 @@ class Pet extends Model
     {
         return $this->belongsToMany(User::class, 'favorites');
     }
+
+    public function reports()
+    {
+        return $this->morphMany(Report::class, 'reportable');
+    }
 }

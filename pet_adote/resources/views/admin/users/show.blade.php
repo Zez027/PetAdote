@@ -19,6 +19,11 @@
                     <li class="nav-item">
                         <a class="nav-link text-dark" href="{{ route('admin.adoptions.index') }}"><i class="bi bi-clipboard2-heart me-2"></i> Adoções</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('admin.reports.*') ? 'active bg-primary' : 'text-dark' }}" href="{{ route('admin.reports.index') }}">
+                            <i class="bi bi-flag me-2"></i> Denúncias
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>

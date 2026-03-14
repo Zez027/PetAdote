@@ -13,6 +13,8 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AdminPetController;
 use App\Http\Controllers\Admin\AdminAdoptionController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\Admin\AdminReportController;
 
 
 /*
@@ -113,6 +115,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/meus-pets', [PetController::class, 'meusPets'])->name('pets.meus');
         Route::put('/adocoes/{id}/status', [AdoptionController::class, 'updateStatus'])->name('adoptions.updateStatus');
 
+        // Denúncias
+        Route::post('/denunciar', [ReportController::class, 'store'])->name('reports.store');
+
         //termo de adocao
         Route::get('/adocoes/{id}/contrato', [AdoptionController::class, 'downloadContract'])->name('adoptions.contract');
     });
@@ -137,6 +142,10 @@ Route::middleware('auth')->group(function () {
         //Gestao de adocoes
         Route::get('/adocoes', [AdminAdoptionController::class, 'index'])->name('adoptions.index');
         Route::get('/adocoes/{id}', [AdminAdoptionController::class, 'show'])->name('adoptions.show');
+
+        //Gestao de denuncias
+        Route::get('/reports', [AdminReportController::class, 'index'])->name('reports.index');
+        Route::patch('/reports/{report}', [AdminReportController::class, 'update'])->name('reports.update');
     });
 
 });
