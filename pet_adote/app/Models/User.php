@@ -31,4 +31,14 @@ class User extends Authenticatable implements MustVerifyEmail
         // Define que a relação usa a tabela 'favorites' criada no banco
         return $this->belongsToMany(Pet::class, 'favorites')->withTimestamps();
     }
+
+    public function submittedReports()
+    {
+        return $this->hasMany(Report::class);
+    }
+
+    public function reports()
+    {
+        return $this->morphMany(Report::class, 'reportable');
+    }
 }

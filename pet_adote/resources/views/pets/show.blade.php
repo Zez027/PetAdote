@@ -200,9 +200,67 @@
                     </div>
                 @endif
             </div>
+
+            {{-- BOTÃO DE DENÚNCIA DISCRETO ABAIXO DO CARTÃO DE ADOÇÃO --}}
+            @auth
+                @if(auth()->id() !== $pet->user_id)
+                    <div class="text-end mt-3">
+                        <button type="button" class="btn btn-link text-danger text-decoration-none btn-sm px-0" data-bs-toggle="modal" data-bs-target="#reportModal">
+                            <i class="bi bi-exclamation-triangle"></i> Encontrou algo errado? Denunciar anúncio
+                        </button>
+                    </div>
+                @endif
+            @endauth
+
         </div>
     </div>
 </div>
+
+{{-- MODAL DE DENÚNCIA --}}
+@auth
+    @if(auth()->id() !== $pet->user_id)
+    <div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <form action="{{ route('reports.store') }}" method="POST">
+                    @csrf
+                    <div class="modal-header bg-danger text-white border-0">
+                        <h5 class="modal-title fw-bold" id="reportModalLabel"><i class="bi bi-exclamation-triangle-fill me-2"></i>Denunciar Anúncio</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <input type="hidden" name="reportable_id" value="{{ $pet->id }}">
+                        <input type="hidden" name="reportable_type" value="App\Models\Pet">
+
+                        <p class="text-muted small mb-4">A sua denúncia será mantida sob sigilo. A nossa equipe irá rever o caso o mais rapidamente possível.</p>
+
+                        <div class="mb-3">
+                            <label for="reason" class="form-label fw-bold text-dark">Qual é o problema com este anúncio?</label>
+                            <select class="form-select" name="reason" id="reason" required>
+                                <option value="" disabled selected>Selecione um motivo...</option>
+                                <option value="Venda de animal">Venda de animal disfarçada de adoção</option>
+                                <option value="Maus-tratos">Suspeita de maus-tratos</option>
+                                <option value="Perfil falso">Anúncio ou perfil falso</option>
+                                <option value="Conteúdo impróprio">Conteúdo ofensivo ou impróprio</option>
+                                <option value="Outro">Outro motivo</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label fw-bold text-dark">Detalhes adicionais (opcional)</label>
+                            <textarea class="form-control" name="description" id="description" rows="4" placeholder="Forneça mais informações para ajudar a nossa equipe a avaliar o caso..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger rounded-pill px-4">Enviar Denúncia</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    @endif
+@endauth
 
 <script>
     function changePhoto(src, thumb) {
