@@ -27,7 +27,13 @@
                     <select name="tipo" class="form-select bg-light border-0 py-2 filter-select">
                         <option value="">Todos</option>
                         <option value="cao" {{ request('tipo') == 'cao' ? 'selected' : '' }}>Cães</option>
-                        <option value="gato" {{ request('tipo') == 'gato' ? 'selected' : '' }}>Gatos</option>
+                        <option value="gato" {{ request('tipo') == 'gato' ? 'selected' : '' }}>Gatos</option>  
+                        <option value="Pássaro"  {{ request('tipo') == 'Pássaro' ? 'selected' : '' }}>Pássaro</option>
+                        <option value="Coelho" {{ request('tipo') == 'Coelho' ? 'selected' : '' }}>Coelho</option>
+                        <option value="Roedor" {{ request('tipo') == 'Roedor' ? 'selected' : '' }}>Roedor</option>
+                        <option value="Réptil" {{ request('tipo') == 'Réptil' ? 'selected' : '' }}>Réptil</option>
+                        <option value="Equino" {{ request('tipo') == 'Equino' ? 'selected' : '' }}>Equino</option>
+                        <option value="Outros" {{ request('tipo') == 'Outros' ? 'selected' : '' }}>Outros</option>
                     </select>
                 </div>
 
